@@ -1,6 +1,8 @@
 use std::fs::File;
 use std::io::Read;
 
+mod mods;
+
 fn main() {
     println!("\nWelcome to MCU Scanner 🦀🦀🦀");
     
@@ -39,4 +41,14 @@ fn main() {
     //       Still trying to figure out what would be the best way to store and match the signatured
     //       a. keep the libmagic structure and extend existing libmagic parsers to extract metadata
     //       b. get creativew and do something else 
+
+    // Extract/decompress if needed
+    mods::extract::extract_file(file);
+    
+    // Match signature and extract relevant information
+    mods::verify::verify_file(file_content);
+
+    // Print out the relevant information
+    mods::print::print_data();
+
 }
