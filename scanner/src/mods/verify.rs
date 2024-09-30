@@ -4,6 +4,9 @@
 // examples: 1. file size is negative
 //           2. a field value is not valid for the signature that is supposed to be a part of
 //
+extern crate crc;
+const X25: crc::Crc<u16> = crc::Crc::<u16>::new(&crc::CRC_16_IBM_SDLC);
+
 
 #[derive(Debug)]
 pub struct Signature{
@@ -29,6 +32,17 @@ pub fn verify_file(contents: [u8; 64]) -> Vec<Signature>{
 
     let mut current_signature: Option<Signature> = None;
 
+    let calc_crc = calculate_crc(&contents);
+    let expect_crc: u16 = 0x906e;
+
+    if calc_crc == expect_crc {
+        println!("CRC check passed!");
+    } else {
+        println!("CRC check failed!");
+        //ToD: handle this
+    }
+
+
     current_signature = Some(Signature {
         magic_number: String::new(),
         vendor: String::new(),
@@ -40,6 +54,10 @@ pub fn verify_file(contents: [u8; 64]) -> Vec<Signature>{
     signatures.push(current_signature.take().unwrap());
 
     signatures
+}
+
+pub fn calculate_crc(contents: &[u8]) -> u16 {
+    X25.checksum(contents)
 }
 
 fn verify_with_size() -> bool {

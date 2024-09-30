@@ -38,3 +38,15 @@ The Last stage is the metadata extraction part, which is where we will be extrac
 
 
 ## Dependencies:  
+We will be using the following dependencies in our project:
+1. text_io
+	- We will be using this crate to get formatted user input; in extract.rs, we will be using it to ask the user for the file path of the firmare and read it directly from the command line.
+2. entropy-lib
+	- We will be using this crate to calculate the entropy of the files. We will be using it in extract.rs to figure out if there are any anomolies.
+3. bin_file
+	- We will be using this crate for handling binary files and making the process simpler so that we can read and process the raw binary data. This will take place in extract.rs, and we will use it mainly to extract metadata for verification.
+4. crc
+	- We will be using this crate for calculating the checksum to make sure that the data in the file is not corrupt in verify.rs.
+
+
+ 
