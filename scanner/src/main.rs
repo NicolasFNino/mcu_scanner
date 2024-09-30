@@ -3,11 +3,6 @@ mod mods;
 fn main() {
     println!("\nWelcome to MCU Scanner 🦀🦀🦀");
     
-    // Selecting an input file. 
-    // TODO: Better way to do it? 
-    println!("\n1. Please type the absolute path to your input file:");
-    
-
     // TODO: 
     // 1. Check if image is a binary blob
     //    Not in Intel Hex format, Motorola SRecord, or compressed.
@@ -27,5 +22,4 @@ fn main() {
 
     // Print out the relevant information
     mods::verify::print_data(sig_matches);
-
 }

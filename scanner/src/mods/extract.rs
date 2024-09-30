@@ -8,18 +8,21 @@ extern crate entropy;
 
 pub fn extract_file() -> [u8; 64]{
 
-    let file_path: String = text_io::read!("{}");
-
-    let mut file = File::open(file_path).unwrap();
-
     let mut file_content = [0u8; 64];
 
-    // Reading the first 64 bytes of the file as bytes
-    let result = file.read_exact(&mut file_content);
     loop {
+        println!("\n1. Please type the absolute path to your input file:");
+
+        let file_path: String = text_io::read!("{}");
+
+        let mut file = File::open(file_path).unwrap();
+
+        // Reading the first 64 bytes of the file as bytes
+        let result = file.read_exact(&mut file_content);
+    
         if result.is_err() {
             println!("error - trying again!");
-            continue; 
+            continue;
         } //if
         break;
     } //loop
