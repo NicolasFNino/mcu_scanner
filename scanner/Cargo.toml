@@ -5,3 +5,6 @@ edition = "2021"
 
 [dependencies]
 text_io = "0.1.12"
+entropy-lib = "1.0.2"
+bin_file = "0.1.1"
+

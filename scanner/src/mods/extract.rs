@@ -1,5 +1,10 @@
 use std::fs::File;
-use std::io::Read;
+use std::io::{Read, BufReader};
+use std::collections::HashMap;
+use std::num::ParseIntError;
+extern crate bin_file;
+extern crate entropy;
+
 
 pub fn extract_file() -> [u8; 64]{
 
@@ -39,4 +44,19 @@ pub fn extract_file() -> [u8; 64]{
     // TODO: Actually check here if we need to convert from srec/intel_hex/zip/gz/etc... to bin, convert it and return the first 64/128 bytes
     
     file_content
+}
+
+fn hex_to_binary(hex: &str) -> Result<String, std::num::ParseIntError> {
+    let number = u64::from_str_radix(hex, 16)?; // Parse hex string into a u64
+    Ok(format!("{:b}", number)) // Convert number to binary string
+
+}
+
+fn calculate_entropy(file_path: &str) -> Result<f64, std::io::Error> {
+    let file = File::open(file_path)?;
+    
+    let mut entropy = 0.0;
+
+    Ok(entropy)
+
 }

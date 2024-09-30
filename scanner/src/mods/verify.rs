@@ -47,6 +47,6 @@ fn verify_with_size() -> bool {
 }
 
 pub fn print_data(sig_matches: Vec<Signature>) {
-    println!("\n4. This is the infoirmation that you are interested in:");
+    println!("\n4. This is the information that you are interested in: ");
     println!("{:#?}", sig_matches);
 }
