@@ -7,3 +7,7 @@ https://crates.io/crates/entropy-lib
 drag and drop?
 https://crates.io/crates/ripdrag
 
+crc
+https://crates.io/crates/crc
+
+

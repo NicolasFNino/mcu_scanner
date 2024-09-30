@@ -7,6 +7,7 @@ extern crate entropy;
 
 
 pub fn extract_file() -> [u8; 64]{
+    
 
     let mut file_content = [0u8; 64];
 

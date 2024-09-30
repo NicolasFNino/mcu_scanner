@@ -47,6 +47,8 @@ We will be using the following dependencies in our project:
 	- We will be using this crate for handling binary files and making the process simpler so that we can read and process the raw binary data. This will take place in extract.rs, and we will use it mainly to extract metadata for verification.
 4. crc
 	- We will be using this crate for calculating the checksum to make sure that the data in the file is not corrupt in verify.rs.
+5. ripdrag
+	- We will be using ripdrag as a dependency so that the user can drag and drop files into their terminal for the firmware instead of providing the file path.
 
 
  
