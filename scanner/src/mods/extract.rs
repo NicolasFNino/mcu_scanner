@@ -64,3 +64,17 @@ fn calculate_entropy(file_path: &str) -> Result<f64, std::io::Error> {
     Ok(entropy)
 
 }
+
+//idk if this signature is correct - not sure if lifetime is correct/needed
+pub fn read_firmware<'a>(file_path: &'a str) {
+    //try to open with file path
+    if let Ok(file) = File::open(file_path) {
+        let reader = BufReader::new(file);
+        //loop through each line in the file
+        //try to read line - include error checking if read fails
+        //.contains to see if it has "" for specific thing we are looking for?
+        //use else if^
+    } else {
+        //print error for trying to open the file
+    } //if (open file)
+} //read_firmware
