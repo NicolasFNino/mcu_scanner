@@ -26,10 +26,10 @@ pub fn extract_file() -> Vec<u8>{
     }
 
     // Printing the contents of the file. Only for debugging
-    println!("\nThe contents of the file:");
-    for byte in &file_content {
-        println!("{:#04X?}", byte)
-    }
+    // println!("\nThe contents of the file:");
+    // for byte in &file_content {
+    //     println!("{:#04X?}", byte)
+    // }
      
     println!("\n2. Extracting or decoding the contents of the input file:");
 
