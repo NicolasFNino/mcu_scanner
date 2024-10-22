@@ -14,19 +14,21 @@ pub struct Signature{
     vendor: String,
     architecture: String,
     series: String,
+    file_size: u32,
+    version: String,
+    base_address: u32,
+    file_offset: u32,
+    entry_point: u32,
     fields: Vec<Field>,
 }
 
 #[derive(Debug)]
 struct Field {
-    file_size: u32,
-    version: String,
-    base_address: u32,
-    file_offset: u32,
-    entry_point: u32
+    name: String,
+    value: String
 }
 
-pub fn verify_file(contents: [u8; 64]) -> Vec<Signature>{
+pub fn verify_file(contents: Vec<u8>) -> Vec<Signature>{
     println!("\n3. Verifing the contents of the input file:");
     let mut signatures = Vec::new();
 
@@ -48,6 +50,11 @@ pub fn verify_file(contents: [u8; 64]) -> Vec<Signature>{
         vendor: String::new(),
         architecture: String::new(),
         series: String::new(),
+        file_size: 0,
+        version: String::new(),
+        base_address: 0,
+        file_offset: 0,
+        entry_point: 0,
         fields: Vec::new()
     });
 
