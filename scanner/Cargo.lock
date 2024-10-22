@@ -206,6 +206,7 @@ dependencies = [
  "bin_file",
  "crc",
  "entropy-lib",
+ "regex",
  "text_io",
 ]
 
