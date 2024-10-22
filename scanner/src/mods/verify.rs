@@ -71,7 +71,7 @@ fn read_signatures() -> Vec<Signature> {
 
     let re = Regex::new(r"\s+").unwrap();
 
-    if let Ok(lines) = read_lines("magic/vendors") {
+    if let Ok(lines) = read_lines("magic/vendors_to_test") {
         let mut fields_to_add: Vec<Field> = Vec::new();
         for line in lines.flatten() {
 

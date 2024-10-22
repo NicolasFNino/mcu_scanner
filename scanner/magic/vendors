@@ -2,11 +2,9 @@
 # Magic number format : _Vendor/Architecture, Series, name, Architecture {tags}
 
 # Telink Header firmware signature
-8    string    KNLT     _Telink,,firmware header,, {location:0}
+8    string    KNLT     _Telink,,firmware header,,
 # the size of whole telink file
 >24  lelong    x        File size %d,
->24  lelong    x        {fsize:%d}
->24  lelong    x        {jump:%d}
 
 ## Qualcomm firmwares from 
 # https://developer.qualcomm.com/qfile/34081/csr102x_otau_overview.pdf
