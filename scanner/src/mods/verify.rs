@@ -90,7 +90,7 @@ fn match_signature(entry: Signature, file_content: &Vec<u8>) {
                         if *character == value.as_bytes()[index] {
                             println!("Char match!")
                         } else {
-                            println!("Signature match failed:\n\t{} != {}", *character, value.as_bytes()[index])
+                            println!("Signature match failed:\n\t{} != {}", *character, value.as_bytes()[index]);
                             is_valid = false;
                         }
                     }
