@@ -4,5 +4,5 @@
 # Telink Header firmware signature
 8    string    KNLT     _Telink,,firmware header,,
 # the size of whole telink file
->24  lelong    x        File size %d,
+>24  long    x        File size %d,
 

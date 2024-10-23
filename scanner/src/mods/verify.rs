@@ -19,7 +19,7 @@ pub struct Signature{
 #[derive(Debug)]
 #[derive(Clone)]
 struct Field {
-    position: u32,
+    position: usize,
     value_type: FieldType,
     constraint: String,
     description: String
@@ -53,6 +53,10 @@ pub fn verify_file(contents: Vec<u8>) -> Vec<Signature>{
     println!("\n3. Verifing the contents of the input file:");
     let signatures = read_signatures();
 
+    for entry in signatures {
+        match_signature(entry, &contents);
+    }
+
     let calc_crc = calculate_crc(&contents);
     let expect_crc: u16 = 0x906e;
 
@@ -63,7 +67,46 @@ pub fn verify_file(contents: Vec<u8>) -> Vec<Signature>{
         //ToD: handle this
     }
 
-    signatures
+    //signatures
+    Vec::new()
+}
+
+fn match_signature(entry: Signature, file_content: &Vec<u8>) {
+    let mut is_valid = true;
+    for field in entry.fields {
+        if !is_valid {
+            break;
+        }
+        let pos = field.position;
+        let vtype = field.value_type;
+        let value = field.constraint;
+        let desc = field.description;
+        match vtype {
+            FieldType::Str => {
+                let end_index = value.len() + pos; 
+                if end_index < file_content.len() {
+                    let slice = &file_content[pos..end_index];
+                    for (index, character) in slice.iter().enumerate() {
+                        if *character == value.as_bytes()[index] {
+                            println!("Char match!")
+                        } else {
+                            println!("Signature match failed:\n\t{} != {}", *character, value.as_bytes()[index])
+                            is_valid = false;
+                        }
+                    }
+                } else {
+                    println!("There was something wrong!");
+                    is_valid = false;
+                }
+            },
+            _ => {
+
+            }
+        }
+    }
+    if is_valid {
+        
+    }
 }
 
 fn read_signatures() -> Vec<Signature> {
@@ -110,7 +153,7 @@ fn read_signatures() -> Vec<Signature> {
                     println!("\n==========\nITEM: {}\n==========\n", item);
                     match index {
                         0 => {
-                            let mut num: u32  = 0;
+                            let mut num: usize  = 0;
                             if item.starts_with(">") {
                                 let re = Regex::new(r">\s*(\d+)").unwrap();
                                 if let Some(captures) = re.captures(item.trim()) {
