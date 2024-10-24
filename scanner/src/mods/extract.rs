@@ -70,4 +70,4 @@ pub fn read_firmware<'a>(file_path: &'a str) -> Vec<u8> {
             return Vec::new();
         } 
     }
-} 
+}
