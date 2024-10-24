@@ -4,6 +4,7 @@ use std::collections::HashMap;
 use std::num::ParseIntError;
 extern crate bin_file;
 extern crate entropy;
+use shannon_entropy::shannon_entropy; 
 
 
 pub fn extract_file() -> Vec<u8>{
@@ -43,14 +44,19 @@ fn hex_to_binary(hex: &str) -> Result<String, std::num::ParseIntError> {
 
 }
 
-fn calculate_entropy(file_path: &str) -> Result<f64, std::io::Error> {
-    let file = File::open(file_path)?;
-    
-    let mut entropy = 0.0;
 
+
+fn calculate_file_entropy(file_path: &str) -> Result<f32, std::io::Error> {
+    let file = File::open(file_path)?; 
+    let mut buf_reader = BufReader::new(file); 
+    let mut buffer = Vec::new(); 
+    buf_reader.read_to_end(&mut buffer)?;
+    let contentstr = String::from_utf8_lossy(&buffer);
+    let entropy: f32 = shannon_entropy(&contentstr); 
     Ok(entropy)
-
 }
+
+
 
 //idk if this signature is correct - not sure if lifetime is correct/needed
 pub fn read_firmware<'a>(file_path: &'a str) -> Vec<u8> {

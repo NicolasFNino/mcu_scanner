@@ -203,9 +203,19 @@ fn calculate_crc(contents: &[u8]) -> u16 {
     X25.checksum(contents)
 }
 
-fn verify_with_size() -> bool {
-    true
-}
+//need to make sure this signature is correct
+pub fn verify_with_size(file_path: &str, expected_size: usize) -> std::io::Result<bool> {
+    let file = std::fs::read(file_path)?;
+    if file.len() != expected_size {
+        println!("file size doesnt match expected size");
+        return Ok(false);
+    } //if
+    //file Vec<u8>
+    let checksum = X25.checksum(&file);
+    println!("checksum: {:#X}", checksum);
+    Ok(true)
+    //do i need to check the checksum value with something??
+} //verify_with_size
 
 pub fn print_data(sig_matches: Vec<Signature>) {
     println!("\n4. This is the information that you are interested in: ");

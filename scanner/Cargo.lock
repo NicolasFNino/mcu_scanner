@@ -207,6 +207,7 @@ dependencies = [
  "crc",
  "entropy-lib",
  "regex",
+ "shannon-entropy",
  "text_io",
 ]
 
@@ -229,6 +230,12 @@ dependencies = [
  "quote",
  "syn",
 ]
+
+[[package]]
+name = "shannon-entropy"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8937fedcf3a0c1b756a3ef112f8b1739627e7020fb3623976b5e55351d3c4813"
 
 [[package]]
 name = "strsim"
