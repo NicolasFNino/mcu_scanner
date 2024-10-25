@@ -38,12 +38,45 @@ pub fn extract_file() -> Vec<u8>{
     file_content
 }
 
-fn hex_to_binary(hex: &str) -> Result<String, std::num::ParseIntError> {
-    let number = u64::from_str_radix(hex, 16)?; // Parse hex string into a u64
-    Ok(format!("{:b}", number)) // Convert number to binary string
 
-}
+fn hex_str_to_binary(hex: &str) -> Result<Vec<u8>, std::num::ParseIntError> {
+    let hex = hex.trim_start_matches("0x");
 
+    let hex = if hex.len() % 2 != 0 {
+        format!("0{}", hex)
+    } else {
+        hex.to_string()
+    };//end if else
+
+    let mut binary_vec = Vec::new();
+
+    for i in (0..hex.len()).step_by(2) {
+        let byte = u8::from_str_radix(&hex[i..i + 2], 16)?;
+        binary_vec.push(byte);
+    }//end for
+    Ok(binary_vec)
+}//end hex_str_to_binary
+
+fn hex_file_to_binary(file_path: &str) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
+    let mut file = File::open(file_path)?; 
+    let mut hex_data = String::new();
+    file.read_to_string(&mut hex_data)?;
+    let hex_data = hex_data.trim_start_matches("0x");
+
+    let hex_data = if hex_data.len() % 2 != 0 {
+        format!("0{}", hex_data)
+    } else {
+        hex_data.to_string()
+    };//end if else
+
+    let mut binary_vec = Vec::new();
+
+    for i in (0..hex_data.len()).step_by(2) {
+        let byte = u8::from_str_radix(&hex_data[i..i + 2], 16)?;
+        binary_vec.push(byte);
+    }//end for
+    Ok(binary_vec)
+}//end hex_file_to_binary
 
 
 fn calculate_file_entropy(file_path: &str) -> Result<f32, std::io::Error> {
