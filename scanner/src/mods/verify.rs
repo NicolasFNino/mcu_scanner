@@ -210,7 +210,6 @@ pub fn verify_with_size(file_path: &str, expected_size: usize) -> std::io::Resul
         println!("file size doesnt match expected size");
         return Ok(false);
     } //if
-    //file Vec<u8>
     let checksum = X25.checksum(&file);
     println!("checksum: {:#X}", checksum);
     Ok(true)

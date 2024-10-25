@@ -79,7 +79,7 @@ pub fn hex_file_to_binary(file_path: &str) -> Result<Vec<u8>, Box<dyn std::error
 }//end hex_file_to_binary
 
 
-fn calculate_file_entropy(file_path: &str) -> Result<f32, std::io::Error> {
+pub fn calculate_file_entropy(file_path: &str) -> Result<f32, std::io::Error> {
     let file = File::open(file_path)?; 
     let mut buf_reader = BufReader::new(file); 
     let mut buffer = Vec::new(); 
