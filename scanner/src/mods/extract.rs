@@ -39,7 +39,7 @@ pub fn extract_file() -> Vec<u8>{
 }
 
 
-fn hex_str_to_binary(hex: &str) -> Result<Vec<u8>, std::num::ParseIntError> {
+pub fn hex_str_to_binary(hex: &str) -> Result<Vec<u8>, std::num::ParseIntError> {
     let hex = hex.trim_start_matches("0x");
 
     let hex = if hex.len() % 2 != 0 {
@@ -57,7 +57,7 @@ fn hex_str_to_binary(hex: &str) -> Result<Vec<u8>, std::num::ParseIntError> {
     Ok(binary_vec)
 }//end hex_str_to_binary
 
-fn hex_file_to_binary(file_path: &str) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
+pub fn hex_file_to_binary(file_path: &str) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
     let mut file = File::open(file_path)?; 
     let mut hex_data = String::new();
     file.read_to_string(&mut hex_data)?;
