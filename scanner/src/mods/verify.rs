@@ -65,6 +65,7 @@ pub fn verify_file(contents: Vec<u8>) -> Vec<Signature>{
     } else {
         println!("CRC check failed!");
         //ToD: handle this
+        return Vec::new();
     }
 
     //signatures
@@ -213,7 +214,12 @@ pub fn verify_with_size(file_path: &str, expected_size: usize) -> std::io::Resul
     let checksum = X25.checksum(&file);
     println!("checksum: {:#X}", checksum);
     Ok(true)
-    //do i need to check the checksum value with something??
+    //implementation for checking checksum but idk the actual checksum value we need to compare it to
+    // if let Some(expected) = expected_checksum {
+    //    println!("checksum doesnt match");
+    //    return Ok(false);
+    //} //if
+    //Ok(true);
 } //verify_with_size
 
 pub fn print_data(sig_matches: Vec<Signature>) {

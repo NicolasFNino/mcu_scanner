@@ -35,6 +35,13 @@ pub fn extract_file() -> Vec<u8>{
     println!("\n2. Extracting or decoding the contents of the input file:");
 
     // TODO: Actually check here if we need to convert from srec/intel_hex/zip/gz/etc... to bin, convert it and return the first 64/128 bytes
+    if file_content[0] == b':' {
+        println!("intel->binary");
+        
+    }else if file_content[0] == b'S' {
+        println!("SREC -> binary");
+    }
+    file_content.truncate(64);
     file_content
 }
 

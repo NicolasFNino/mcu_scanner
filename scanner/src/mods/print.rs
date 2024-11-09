@@ -1,4 +1,17 @@
-//placeholder for now
-pub fn print_metadata() {
-    println!("Extracting and printing metadata!");
+//metadata
+pub fn print_metadata(metadata: &Metadata) {
+    println!("File Metadata:");
+    println!("Filen ame: {}", metadata.filename);
+    println!("File size: {} bytes", metadata.file_size);
+    println!("Entropy: {:.2}", metadata.entropy);
 }
+
+//file verif
+pub fn print_verification_result(result: bool) {
+    if result {
+        println!("Successful");
+    } else {
+        println!("Failed :()");
+    }
+}
+
