@@ -4,16 +4,16 @@
 # Telink Header firmware signature
 8    string    KNLT     _Telink,,firmware header,,
 # the size of whole telink file
->24  lelong    x        File size %d,
+>24  lelong    x        File size,
 
 ## Qualcomm firmwares from 
 # https://developer.qualcomm.com/qfile/34081/csr102x_otau_overview.pdf
 # UPGRADE HEADER 
 0    string    APPUHDR  _Qualcomm,CSR102x,over-the-air UPGRADE header,,
 # size of this upgrade header without magic number and length
->8   long      x        header size %d,
->12  string    x        device variant %s,
->20  long      x        upgrade version %d,
+>8   long      x        header size,
+>12  string    x        device variant,
+>20  long      x        upgrade version,
 
 
 ## CC13x0 SDK signature
@@ -21,7 +21,6 @@
 # on-chip OAD Image A
 8    string    AAAA     _Ti,CC13x0,on-chip OAD Image A, arm,{overlap}{location:8}
 >0   uleshort    x        CRC: 0x%x,
-#>2   uleshort    !0xFFFF  {invalid} # CRC:Shadow must be 0xffff 
 >2   uleshort    x        CRC:Shadow 0x%x # Let's be conservative for now. Don't miss valid ones.
 >4   uleshort    x        Version 0x%x,
 >6   uleshort*4    x        Length: 0x%x,
@@ -79,14 +78,14 @@
 0    string    pQ       _Dialog,DA145xx,Dialog SUOTA Single Image Header,,{location:0}
 >2   regex     (?!\xAA|\x00). {invalid}
 >3   ubyte     x        Image ID 0x%x,
->4   ulelong   x        Code size: %d,
+>4   ulelong   x        Code size:,
 >4   ulelong+64 x       {fsize:%d}
 >4   ulelong   x        {size:%d}
 >8   ubelong   x        CRC: 0x%x,
->12  string    x        Version %s,
+>12  string    x        Version,
 >28  ulelong   <946702800   {invalid}
 >28  ulelong   x        Timestamp %u,
->28  ledate    x        date: %s,
+>28  ledate    x        date:,
 >32  ubyte     0x00     Unencrypt image,
 >32  ubyte     0x01     Encrypted image,
 >32  regex     (?!\x00|\x01). {invalid} 
@@ -99,7 +98,7 @@
 0     regex     [0-9A-F]{10}0[01]\r?\n:  _Cypress,Cypress,Bootloader Application and Code Data File Format cyacd,arm, {location:0}{strlen:8} # the strlen is for ID
 >0    string    x        SiliconID {string}%s, {strlen:2} # the strlen is for Rev
 >8    string    x        SiliconRev {string}%s,
->10   string    x        Checksum Type %s,
+>10   string    x        Checksum Type,
 
 # cyacd2
 26    string    @APPINFO: _Cypress,Cypress,Bootloader Application and Code Data File Format cyacd2,arm, {strlen:2} # the strlen is for version
@@ -113,7 +112,7 @@
 
 # Encryption Initial Vector in cyacd2
 0     string    @EIV:    _Cypress,Cypress,Encryption Initial vector in cyacd2,arm,
->5    string    x        EIVector %s,
+>5    string    x        EIVector,
 
 # ESP32/S2/S3/C2/C3/C6/H2/ESP8266 V1
 # TODO: fix the location 0 
@@ -121,7 +120,7 @@
 # segment number cannot be too much
 # TODO: set the value by user 
 >1    ubyte     >13      {invalid}
->1    byte      x        %d segments,
+>1    byte      x        segments,
 # SPI Flash Mode 
 >2    ubyte     >3       {invalid}
 >2    byte      =0       QIO,
@@ -139,7 +138,7 @@
 #>3    ubyte&0xF =2       Flash frequency 20MHZ,
 #>3    ubyte&0xF =0xf     Flash frequency 80MHZ,
 >4    lelong    x        Entry Address 0x%x,
->12   ushort    x        Chip-id %d,
+>12   ushort    x        Chip-id,
 #ESP8266 V2
 # 0     ubyte     0xea     _ESP,ESP8266,App Image Format V2,xtensa{location:0}
 
@@ -298,7 +297,7 @@
 
 # UPG file
 0       regex       (2SWU3TXV|LoaderFileGen)       _UPG file, , , ,  {location:0}
->64     long        x                               Version %s,
+>64     long        x                               Version,
 
 
 ## STM32
@@ -310,7 +309,7 @@
 
 ## Ubisys
 0       string          ubisys                                              _ubisys, , File header, , {location:0x14}
->7       ulong           x                                                   version %s,
+>7       ulong           x                                                   version,
 
 ## CSR
 0    string        CSR-dfu1       _CSR, CSR BlueCore, CSR DFU firmware update header, CSR, 
