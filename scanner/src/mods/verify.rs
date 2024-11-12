@@ -87,57 +87,182 @@ fn match_signature(entry: Signature, file_content: &mut Vec<u8>, list_matches: &
         let desc = field.description;
         match vtype {
             FieldType::Str => {
-                println!("Signature field is a string:");
-                let end_index = value.len() + pos; 
-                if end_index < file_content.len() {
-                    let slice = &file_content[pos..end_index];
-                    for (index, character) in slice.iter().enumerate() {
-                        if *character == value.as_bytes()[index] {
-                            // println!("Char match!");
-                        } else {
-                            println!("Signature match failed:\n\t{} != {}", *character, value.as_bytes()[index]);
-                            is_valid = false;
-                        }
+                println!("Signature field is a string: {}", value);
+                if value.trim() == "x" {
+                    println!("Only for displaying purposes");
+                    if desc.trim() == "OTA header string," {
+                        let string = String::from_utf8_lossy(&file_content[pos..pos+32]);
+                        current_match.push((desc, string.to_string()));
+                    } else {
+                        let string = String::from_utf8_lossy(&file_content[pos..pos+5]);
+                        current_match.push((desc, string.to_string()));
                     }
-                    if is_valid {
-                        current_match.push((desc, value));
-                    }
+                    
                 } else {
-                    println!("There was something wrong!");
-                    is_valid = false;
+                    let end_index = value.len() + pos; 
+                    if end_index < file_content.len() {
+                        let slice = &file_content[pos..end_index];
+                        for (index, character) in slice.iter().enumerate() {
+                            if *character == value.as_bytes()[index] {
+                                // println!("Char match!");
+                            } else {
+                                println!("Signature match failed:\n\t{} != {}", *character, value.as_bytes()[index]);
+                                is_valid = false;
+                            }
+                        }
+                        if is_valid {
+                            current_match.push((desc, value));
+                        }
+                    } else {
+                        println!("There was something wrong!");
+                        is_valid = false;
+                    }
                 }
+                
             },
             FieldType::Byte => {
                 println!("Signature field is a byte:");
-                if file_content[pos] == value.as_bytes()[0] {
-                    println!("Byte match!");
-                } else {
-                    println!("Not a match!");
-                    is_valid = false;
+                println!("{}", value);
+                if value.trim() == "x" {
+                    println!("Only for displaying purposes");
+                    current_match.push((desc, format!("{}", file_content[pos])));
+                } else  {
+                    let byte_value = u8::from_str_radix(&value, 16);
+                    match byte_value {
+                        Ok(byte) => {
+                            println!("The byte value is: 0x{:X}", byte); // Prints: The byte value is: 0xE9
+                            if file_content[pos] == byte 
+                            {
+                                println!("Byte match!");
+                                current_match.push((desc, format!("{}", byte)));
+                            } else {
+                                println!("Not a match!");
+                                is_valid = false;
+                            }
+                        }
+                        Err(e) => {
+                            println!("Failed to parse hex string: {}", e);
+                            is_valid = false;
+                        }
+                    }
+                    
                 }
+                
             },
             FieldType::Short => {
-                println!("Signature field is a short:")
+                println!("Signature field is a short:");
+                if value == 'x'.to_string() {
+                    let in_file = &file_content[pos..pos+2];
+                    if desc.trim() == "Header size," {
+                        // Convert the slice into an array of 4 bytes
+                        let size = in_file.try_into().expect("Failed to convert slice to array");
+
+                        // Convert the bytes to a 32-bit unsigned integer (little-endian)
+                        let size = u16::from_le_bytes(size);
+                        println!("Size in file: {}", size);
+
+                        //Add it to the curretn signature match fields
+                        current_match.push((desc, format!("{} bytes", size)));
+                    } else if desc.trim() == "Length," {
+                        // Convert the slice into an array of 4 bytes
+                        let size = in_file.try_into().expect("Failed to convert slice to array");
+
+                        // Convert the bytes to a 32-bit unsigned integer (little-endian)
+                        let size_value: u16 = u16::from_le_bytes(size);
+                        let final_size: u32 = size_value as u32 * 4;
+
+                        println!("Size in file: {}", final_size);
+
+                        //Add it to the curretn signature match fields
+                        current_match.push((desc, format!("{} bytes", final_size)));
+                    } else {
+                        println!("Only for displaying purposes");
+                        let in_file = &file_content[pos..pos+2];
+                        let hex_string: String = in_file
+                                .iter()
+                                .map(|byte| format!("{:02X}", byte))  // Format each byte as two-digit hex
+                                .collect::<Vec<String>>()
+                                .join(" ");
+                            current_match.push((desc, hex_string));
+                    }
+                }
             }
             FieldType::Long => {
                 println!("Signature field is a long:");
                 if value == 'x'.to_string() {
                     println!("Only for displaying purposes");
+                    let in_file = &file_content[pos..pos+4];
+                    if desc.trim() == "File size," {
+                        // Convert the slice into an array of 4 bytes
+                        let size = in_file.try_into().expect("Failed to convert slice to array");
+
+                        // Convert the bytes to a 32-bit unsigned integer (little-endian)
+                        let size = u32::from_le_bytes(size);
+                        println!("Size in file: {}", size);
+
+                        // TODO: Check file size
+
+                        //Add it to the curretn signature match fields
+                        current_match.push((desc, format!("{} bytes", size)));
+                    }      
+                    else if desc.trim() == "Code size," {
+                        // Convert the slice into an array of 4 bytes
+                        let size = in_file.try_into().expect("Failed to convert slice to array");
+
+                        // Convert the bytes to a 32-bit unsigned integer (little-endian) + 64 to account for the header size
+                        let size = u32::from_le_bytes(size) + 64;
+                        println!("Size in file: {}", size);
+
+                        // TODO: Check file size
+
+                        //Add it to the curretn signature match fields
+                        current_match.push((desc, format!("{} bytes", size)));
+                    } else if desc.trim() == "Header size," {
+                        // Convert the slice into an array of 4 bytes
+                        let size = in_file.try_into().expect("Failed to convert slice to array");
+
+                        // Convert the bytes to a 32-bit unsigned integer (little-endian)
+                        let size = u32::from_be_bytes(size);
+                        println!("Size in file: {}", size);
+
+                        // TODO: Check file size
+
+                        //Add it to the curretn signature match fields
+                        current_match.push((desc, format!("{} bytes", size)));
+                    }
+                    else {
+                        let hex_string: String = in_file
+                            .iter()
+                            .map(|byte| format!("{:02X}", byte))  // Format each byte as two-digit hex
+                            .collect::<Vec<String>>()
+                            .join(" ");
+                        current_match.push((desc, hex_string));
+                    }
+                } else {
+                    let mut bytes = Vec::new();
+    
+                    // Iterate through the string two characters at a time
+                    for i in (0..value.len()).step_by(2) {
+                        // Get the two characters, convert them to a byte
+                        let byte_str = &value[i..i+2];
+                        match u8::from_str_radix(byte_str, 16) {
+                            Ok(byte) => bytes.push(byte),
+                            Err(e) => {
+                                println!("Failed to parse '{}' as hex: {}", byte_str, e);
+                                return;
+                            }
+                        }
+                    }
+
+                    println!("Byte array: {:?}", bytes); // Prints: Byte array: [60, 184, 243, 150]
+
+                    if file_content[pos..pos+4] != bytes[..] {
+                        is_valid = false;
+                    } else {
+                        current_match.push((desc, String::from_utf8_lossy(&bytes).to_string()));
+                    }
                 }
-                let in_file = &file_content[pos..pos+4];
-                if desc.trim() == "File size," {
-                    // Convert the slice into an array of 4 bytes
-                    let size = in_file.try_into().expect("Failed to convert slice to array");
-
-                    // Convert the bytes to a 32-bit unsigned integer (little-endian)
-                    let size = u32::from_le_bytes(size);
-                    println!("Size in file: {}", size);
-
-                    // TODO: Check file size
-
-                    //Add it to the curretn signature match fields
-                    current_match.push((desc, format!("{} bytes", size)));
-                }         
+                    
             }
             _ => {
 
@@ -154,7 +279,7 @@ fn read_signatures() -> Vec<Signature> {
 
     let re = Regex::new(r"\s+").unwrap();
 
-    if let Ok(lines) = read_lines("magic/vendors_to_test") {
+    if let Ok(lines) = read_lines("magic/vendors") {
         let mut fields_to_add: Vec<Field> = Vec::new();
         for line in lines.flatten() {
 
@@ -206,6 +331,8 @@ fn read_signatures() -> Vec<Signature> {
                                     println!("No match found");
                                 }
                                 
+                            } else if item.is_empty() {
+                                println!("Empty item");
                             } else {
                                 num = item.trim().parse().expect("Not a valid number!");
                             }

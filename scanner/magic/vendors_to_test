@@ -1,8 +1,25 @@
-# Signatures gathered from https://github.com/MCUSec/RealworldFirmware/blob/main/FirmProcessing/magic/vendors
-# Magic number format : _Vendor/Architecture, Series, name, Architecture {tags}
+0   long     1ef1ee0b  _Zigbee,,OTA Header Format,, 
+>4  byte       x           Major version,
+>5  byte       x           Minor version, 
+>6  short    x           Header size,
+>8  short    x           Header bit control,
+>10 short    x           Manufacturer code,
+>12 short    x           Image type:       
+# >12 short    <0xffc0     Manufacturer specific,
+# >12 short    =0xffc0     Client security credentials,
+# >12 short    =0xffc1     Client configuration,
+# >12 short    =0xffc2     Server log,
+# >12 short    =0xffc3     Picture,
+# >12 short    =0xffff     Wildcard,
+# >12 short    >0xffc3     
+# >>12 short   <0xffff     Unknown type,
+>14 long     x           File version,
+>14 byte       x           Application release,
+>15 byte       x           Application build,
+>16 byte       x           Stack release,
+>17 byte       x           Stack build,
+>18 short    x           Zigbee stack version,
+>20 string      x           OTA header string,
+>52 long     x           file size,
 
-# Telink Header firmware signature
-8    string    KNLT     _Telink,,firmware header,,
-# the size of whole telink file
->24  long    x        File size,
 

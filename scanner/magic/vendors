@@ -4,15 +4,15 @@
 # Telink Header firmware signature
 8    string    KNLT     _Telink,,firmware header,,
 # the size of whole telink file
->24  lelong    x        File size,
+>24  long    x        File size,
 
 ## Qualcomm firmwares from 
 # https://developer.qualcomm.com/qfile/34081/csr102x_otau_overview.pdf
 # UPGRADE HEADER 
 0    string    APPUHDR  _Qualcomm,CSR102x,over-the-air UPGRADE header,,
 # size of this upgrade header without magic number and length
->8   long      x        header size,
->12  string    x        device variant,
+>8   long      x        Header size,
+>12  long    x        device variant,
 >20  long      x        upgrade version,
 
 
@@ -20,47 +20,47 @@
 
 # on-chip OAD Image A
 8    string    AAAA     _Ti,CC13x0,on-chip OAD Image A, arm,{overlap}{location:8}
->0   uleshort    x        CRC: 0x%x,
->2   uleshort    x        CRC:Shadow 0x%x # Let's be conservative for now. Don't miss valid ones.
->4   uleshort    x        Version 0x%x,
->6   uleshort*4    x        Length: 0x%x,
->12  uleshort*4    x        Base: 0x%x, (reserved)
->14  ubyte     x        The type of image 0x%x (reserved),
+>0   short    x        CRC,
+>2   short    x        CRC:Shadow # Let's be conservative for now. Don't miss valid ones.
+>4   short    x        Version,
+>6   short*4    x        Length,
+>12  short*4    x        Base, (reserved)
+>14  byte     x        The type of image (reserved),
 # The state informs the bootloader whether or not the image is ready to run or currently running
->15  ubyte     x        Run State 0x%x (resevered),
+>15  byte     x        Run State (resevered),
 
 
 # on-chip OAD Image B 
-8    string    BBBB     _Ti,CC13x0,on-chip OAD Image B, arm,{overlap}{location:0}
->0   uleshort    x        CRC: 0x%x,
-#>2   uleshort    !0xFFFF  {invalid} # CRC:Shadow must be 0xffff 
->2   uleshort    x        CRC:Shadow 0x%x # Let's be conservative for now. Don't miss valid ones.
->4   uleshort    x        Version 0x%x,
->6   uleshort*4    x        Length: 0x%x,
->12  uleshort*4    x        Base: 0x%x, (reserved)
->14  ubyte     x        The type of image 0x%x (reserved),
+8    string    BBBB     _Ti,CC13x0,on-chip OAD Image B, arm,{overlap} 
+>0   short    x        CRC,
+# >2   short    !0xFFFF  {invalid} # CRC:Shadow must be 0xffff 
+>2   short    x        CRC:Shadow
+>4   short    x        Version,
+>6   short    x        Length,
+# >12  short*4    x        Base, (reserved)
+>14  byte     x        The type of image (reserved),
 # The state informs the bootloader whether or not the image is ready to run or currently running
->15  ubyte     x        Run State 0x%x (resevered),
+>15  byte     x        Run State (resevered),
 
 # off-chip OAD Image 
 8    string    EEEE     _Ti,CC13x0,off-chip image, arm,{overlap}{location:8}
->0   uleshort    x        CRC: 0x%x,
-#>2   ushort    !0xFFFF  {invalid} # CRC:Shadow must be 0xffff 
->2   uleshort    x        CRC:Shadow 0x%x # Let's be conservative for now. Don't miss valid ones.
->4   uleshort    x        Version 0x%x,
->6   uleshort*4    x        Length: 0x%x,
->12  uleshort*4    x        Base: 0x%x, (reserved)
->14  ubyte-1   >3       {invalid}
->14  ubyte     1        Image type: EFL_OAD_IMG_TYPE_APP,
->14  ubyte     2        Image type: EFL_OAD_IMG_TYPE_STACK,
->14  ubyte     3        Image type: EFL_OAD_IMG_TYPE_NP,
->14  ubyte     4        Image type: EFL_OAD_IMG_TYPE_FACTORY,
+>0   short    x        CRC,
+# >2   short    !0xFFFF  {invalid} # CRC:Shadow must be 0xffff 
+>2   short    x        CRC:Shadow 
+>4   short    x        Version,
+>6   short    x        Length,
+# >12  short*4    x        Base, (reserved)
+# >14  byte-1   >3       {invalid}
+# >14  byte     1        Image type: EFL_OAD_IMG_TYPE_APP,
+# >14  byte     2        Image type: EFL_OAD_IMG_TYPE_STACK,
+# >14  byte     3        Image type: EFL_OAD_IMG_TYPE_NP,
+# >14  byte     4        Image type: EFL_OAD_IMG_TYPE_FACTORY,
 # The state informs the bootloader whether or not the image is ready to run or currently running
->15  ubyte     x        Run State 0x%x (resevered),
+>15  byte     x        Run State (resevered),
 
 
 # Ti SimpleLink CC2640 Over-the-Air For BLE-Stack Version:2.1.0/2.1.1 
-0       regex      \xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff[\x00-\xff]{3}\x20 _Ti,CC2640,off-chip OAD Image for V2.1.0/1,{overlap}{location:2}
+# 0       regex      \xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff[\x00-\xff]{3}\x20 _Ti,CC2640,off-chip OAD Image for V2.1.0/1,{overlap}{location:2}
 
 ## Dialog Dialog SUOTA Memory Layout for DA145xx 
 
@@ -70,35 +70,32 @@
 # need to rely the firmware itself is Dialog 
 # TODO: magic number too short and no other judgement 
 # must be at the beginning
-0    string    pP       _Dialog,DA145xx,Dialog SUOTA Multipart Image Header,,{location:0}
->6   uleshort  x        Code size: "0x%x",
+0    string    pP       _Dialog,DA145xx,Dialog SUOTA Multipart Image Header,, 
+>6   short  x        Code size,
 
 # Single Image Header 
 # can be anywhere
-0    string    pQ       _Dialog,DA145xx,Dialog SUOTA Single Image Header,,{location:0}
->2   regex     (?!\xAA|\x00). {invalid}
->3   ubyte     x        Image ID 0x%x,
->4   ulelong   x        Code size:,
->4   ulelong+64 x       {fsize:%d}
->4   ulelong   x        {size:%d}
->8   ubelong   x        CRC: 0x%x,
+0    string    pQ       _Dialog,DA145xx,Dialog SUOTA Single Image Header,, 
+>3   byte     x        Image ID,
+>4   long   x        Code size,
+# >4   long+64 x       {fsize:%d}
+# >4   long   x        {size:%d}
+>8   long   x        CRC,
 >12  string    x        Version,
->28  ulelong   <946702800   {invalid}
->28  ulelong   x        Timestamp %u,
->28  ledate    x        date:,
->32  ubyte     0x00     Unencrypt image,
->32  ubyte     0x01     Encrypted image,
->32  regex     (?!\x00|\x01). {invalid} 
+# >28  long   <946702800   {invalid}
+>28  long   x        Timestamp,
+>32  byte     x     Is it encrypted,
+# >32  regex     (?!\x00|\x01). {invalid} 
 # reserved, must be 31*0xff
->33  regex     (?!\xFF{31})   {invalid}
+# >33  regex     (?!\xFF{31})   {invalid}
 
 # Infineon Cypress Bootloader Application and Code Data File Format
 # NOTE: current length of string need to be set in the above line
 # cyacd
-0     regex     [0-9A-F]{10}0[01]\r?\n:  _Cypress,Cypress,Bootloader Application and Code Data File Format cyacd,arm, {location:0}{strlen:8} # the strlen is for ID
->0    string    x        SiliconID {string}%s, {strlen:2} # the strlen is for Rev
->8    string    x        SiliconRev {string}%s,
->10   string    x        Checksum Type,
+# 0     regex     [0-9A-F]{10}0[01]\r?\n:  _Cypress,Cypress,Bootloader Application and Code Data File Format cyacd,arm,  {strlen:8} # the strlen is for ID
+# >0    string    x        SiliconID {string}%s, {strlen:2} # the strlen is for Rev
+# >8    string    x        SiliconRev {string}%s,
+# >10   string    x        Checksum Type,
 
 # cyacd2
 26    string    @APPINFO: _Cypress,Cypress,Bootloader Application and Code Data File Format cyacd2,arm, {strlen:2} # the strlen is for version
@@ -116,200 +113,184 @@
 
 # ESP32/S2/S3/C2/C3/C6/H2/ESP8266 V1
 # TODO: fix the location 0 
-0     ubyte     0xe9     _ESP,,App Image Format,xtensa,{location:0}
+0     byte     0xe9     _ESP,,App Image Format,xtensa, 
 # segment number cannot be too much
 # TODO: set the value by user 
->1    ubyte     >13      {invalid}
 >1    byte      x        segments,
 # SPI Flash Mode 
->2    ubyte     >3       {invalid}
->2    byte      =0       QIO,
->2    byte      =1       QOUT,
->2    byte      =2       DIO,
->2    byte      =3       DOUT,
->3    ubyte     >0x4f    {invalid}
-#>3    ubyte>>4  =0       Flash size 1MB,
-#>3    ubyte>>4  =1       Flash size 2MB,
-#>3    ubyte>>4  =2       Flash size 4MB,
-#>3    ubyte>>4  =3       Flash size 8MB,
-#>3    ubyte>>4  =4       Flash size 16MB,
-#>3    ubyte&0xF =0       Flash frequency 40MHZ,
-#>3    ubyte&0xF =1       Flash frequency 26MHZ,
-#>3    ubyte&0xF =2       Flash frequency 20MHZ,
-#>3    ubyte&0xF =0xf     Flash frequency 80MHZ,
->4    lelong    x        Entry Address 0x%x,
->12   ushort    x        Chip-id,
-#ESP8266 V2
-# 0     ubyte     0xea     _ESP,ESP8266,App Image Format V2,xtensa{location:0}
+# >2    byte     >3       {invalid}
+# >2    byte      =0       QIO,
+# >2    byte      =1       QOUT,
+# >2    byte      =2       DIO,
+# >2    byte      =3       DOUT,
+# >3    byte     >0x4f    {invalid}
+# >3    byte>>4  =0       Flash size 1MB,
+# >3    byte>>4  =1       Flash size 2MB,
+# >3    byte>>4  =2       Flash size 4MB,
+# >3    byte>>4  =3       Flash size 8MB,
+# >3    byte>>4  =4       Flash size 16MB,
+# >3    byte&0xF =0       Flash frequency 40MHZ,
+# >3    byte&0xF =1       Flash frequency 26MHZ,
+# >3    byte&0xF =2       Flash frequency 20MHZ,
+# >3    byte&0xF =0xf     Flash frequency 80MHZ,
+>4    long    x        Entry Address,
+>12   short    x        Chip-id,
+
+
+# ESP8266 V2
+# 0     byte     0xea     _ESP,ESP8266,App Image Format V2,xtensa 
 
 ##Zigbee OTA Upgrade
 
-0   ulelong     0x0beef11e  _Zigbee,,OTA Header Format,,{location:0}
->4  ubyte       x           Major version %x,
->5  ubyte       x           Minor version %x, 
->6  uleshort    x           Header length: %x,
->8  uleshort    x           Header bit control %x,
->10 uleshort    x           Manufacturer code %x,
->12 uleshort    x           Image type %x:       
->12 uleshort    <0xffc0     Manufacturer specific,
->12 uleshort    =0xffc0     Client security credentials,
->12 uleshort    =0xffc1     Client configuration,
->12 uleshort    =0xffc2     Server log,
->12 uleshort    =0xffc3     Picture,
->12 uleshort    =0xffff     Wildcard,
->12 uleshort    >0xffc3     
->>12 uleshort   <0xffff     Unknown type,
->14 ulelong     x           File version %x,
->14 ubyte       x           Application release %x,
->15 ubyte       x           Application build %x,
->16 ubyte       x           Stack release %x,
->17 ubyte       x           Stack build %x,
->18 uleshort    x           Zigbee stack version %x,
->20 string      x           {strlen:32} OTA header string "%s",
->52 ulelong     x           file size %x,
+0   long     1ef1ee0b  _Zigbee,,OTA Header Format,, 
+>4  byte       x           Major version,
+>5  byte       x           Minor version, 
+>6  short    x           Header size,
+>8  short    x           Header bit control,
+>10 short    x           Manufacturer code,
+>12 short    x           Image type:       
+# >12 short    <0xffc0     Manufacturer specific,
+# >12 short    =0xffc0     Client security credentials,
+# >12 short    =0xffc1     Client configuration,
+# >12 short    =0xffc2     Server log,
+# >12 short    =0xffc3     Picture,
+# >12 short    =0xffff     Wildcard,
+# >12 short    >0xffc3     
+# >>12 short   <0xffff     Unknown type,
+>14 long     x           File version,
+>14 byte       x           Application release,
+>15 byte       x           Application build,
+>16 byte       x           Stack release,
+>17 byte       x           Stack build,
+>18 short    x           Zigbee stack version,
+>20 string      x           OTA header string,
+>52 long     x           File size,
 
 ## MCUBoot
-0   ulelong     0x96f3b83c  _MCUBoot,, OTA image header v1,,{location:0}
->4  ulelong     x           The destination address of the image x%x,
->8  uleshort    x           Header size: %x,
->10 uleshort    x           Size of protected TLV area bytes x%x,
->12 ulelong     x           Code size: %x,
->16 ulelong     x           Header flags: 0x%x,
-#>19 ubyte       =0x04       Encrypted image (AES128),
-#>19 ubyte       =0x08       Encrypted image (AES128),
->20 string      x           {strlen:8} Image version
->20 ubyte       x           Major version %x,
->21 ubyte       x           Minor version %x,  
->22 uleshort    x           Revision %x,
->24 ulelong     x           Build number %x, 
+0   long     3cb8f396  _MCUBoot,, OTA image header v1,, 
+>4  long     x           The destination address of the image x%x,
+>8  short    x           Header size,
+>10 short    x           Size of protected TLV area bytes x%x,
+>12 long     x           Code size,
+>16 long     x           Header flags,
+#>19 byte       =0x04       Encrypted image (AES128),
+#>19 byte       =0x08       Encrypted image (AES128),
+>20 long      x           Image version
+>20 byte       x           Major version,
+>21 byte       x           Minor version,  
+>22 short    x           Revision,
+>24 long     x           Build number, 
 
-0   ulelong     0x96f3b83d  _MCUBoot,, OTA image header,,{location:0}
->4  ulelong     x           Base: x%x,
->8  uleshort    x           Header size: %x,
->10 uleshort    x           Size of protected TLV area bytes x%x,
->12 ulelong     x           Code size: %x,
->16 ulelong     x           Header flags %x,
->20 string      x           {strlen:8} Image version
->20 ubyte       x           Major version %x,
->21 ubyte       x           Minor version %x,  
->22 uleshort    x           Revision %x,
->24 ulelong     x           Build number %x, 
+0   long     3db8f396  _MCUBoot,, OTA image header,, 
+>4  long     x           Base,
+>8  short    x           Header size,
+>10 short    x           Size of protected TLV area bytes x%x,
+>12 long     x           Code size,
+>16 long     x           Header flags,
+>20 long      x           Image version
+>20 byte       x           Major version,
+>21 byte       x           Minor version,  
+>22 short    x           Revision,
+>24 long     x           Build number, 
 
 ## UF2
 #TODO: Find magic_final using payload size
-0   ulelong     0x0a324655  _UF2 Image format,, Magic start 0,,{location:0}
->4  ulelong     x           Magic start 1 0x%x,
->8  ulelong     x           Flags 0x%x,
->12 ulelong     x           Base: 0x%x,
->16 ulelong     x           Payload size %x,
->20 ulelong     x           Block number %x,
->24 ulelong     x           Number of blocks %x,
->28 ulelong     x           Family ID OR file size: 0x%x,
->28 ulelong     =0xe48bff56   Arm, Raspberry Pi Foundation, RP2040
->28 ulelong     =0x5ee21072   Arm, ST, STM32F1
->28 ulelong     =0xada52840   Arm, Nordic, NRF52840
->28 ulelong     =0x16573617   Arm,Microchip,(Atmel) SAMD21
->28 ulelong     =0x1851780a   Arm,Microchip,(Atmel) SAMD51
->28 ulelong     =0x1b57745f   Arm,Nordic,NRF52
->28 ulelong     =0x1c5f21b0   Arm,ESP32,ESP32
->28 ulelong     =0x1e1f432d   Arm,ST,STM32L1xx
->28 ulelong     =0x202e3a91   Arm,ST,STM32L0xx
->28 ulelong     =0x21460ff0   Arm,ST,STM32WLxx
->28 ulelong     =0x2abc77ec   Arm,NXP,LPC55xx
->28 ulelong     =0x300f5633   Arm,ST,STM32G0xx
->28 ulelong     =0x31d228c6   Arm,GigaDevice,GD32F350
->28 ulelong     =0x04240bdf   Arm,ST,STM32L5xx
->28 ulelong     =0x4c71240a   Arm,ST,STM32G4xx
->28 ulelong     =0x4fb2d5bd   Arm,NXP,RT10XX
->28 ulelong     =0x53b80f00   Arm,ST,STM32F7xx
->28 ulelong     =0x55114460   Arm,Microchip,SAMD51
->28 ulelong     =0x57755a57   Arm,ST,STM32F4xx
->28 ulelong     =0x5a18069b   Arm,Cypress,FX2
->28 ulelong     =0x5d1a0a2e   Arm,ST,STM32F2xx
->28 ulelong     =0x621e937a   Arm,Nordic,NRF52833
->28 ulelong     =0x647824b6   Arm,ST,STM32F0xx
->28 ulelong     =0x68ed2b88   Arm,Microchip,SAMD21
->28 ulelong     =0x6b846188   Arm,ST,STM32F3xx
->28 ulelong     =0x6d0922fa   Arm,ST,STM32F407
->28 ulelong     =0x6db66082   Arm,ST,STM32H7xx
->28 ulelong     =0x70d16653   Arm,ST,STM32WBxx
->28 ulelong     =0x7eab61ed   Arm,ESP8266,ESP8266
->28 ulelong     =0x7f83e793   Arm,NXP,KL32L2x
->28 ulelong     =0x8fb060fe   Arm,ST,STM32F407VG
->28 ulelong     =0xbfdd4eee   Arm,ESP32,ESP32-S2
->28 ulelong     =0xc47e5767   Arm,ESP32,ESP32-S3
->28 ulelong     =0xd42ba06c   Arm,ESP32,ESP32-C3
->28 ulelong     =0x2b88d29c   Arm,ESP32,ESP32-C2
->28 ulelong     =0x332726f6   Arm,ESP32,ESP32-H2
->28 ulelong     =0x540ddf62   Arm,ESP32,ESP32-C6
->28 ulelong     =0x3d308e94   Arm,ESP32,ESP32-P4
->28 ulelong     =0x00ff6919   Arm,ST,STM32L4xx
->28 ulelong     =0x9af03e33   Arm,GigaDevice,GD32VF103
->28 ulelong     =0x4f6ace52   Arm,LISTENAI,CSK300x/400x
->28 ulelong     =0x6e7348a8   Arm,LISTENAI,CSK60xx
->28 ulelong     =0x11de784a   Arm,M0SENSE,BL702
->28 ulelong     =0x4b684d71   Arm,Sipeed,MaixPlay-U4(BL618)
->28 ulelong     =0x9517422f   Arm,Renesas,RZ/A1LU (R7S7210xx)
->28 ulelong     =0x2dc309c5   Arm,ST,STM32F411xE
->28 ulelong     =0x06d1097b   Arm,ST,STM32F411xC
->28 ulelong     =0x72721d4e   Arm,Nordic,NRF52832xxAA
->28 ulelong     =0x6f752678   Arm,Nordic,NRF52832xxAB
->508 ulelong    !0x0AB16F30 {invalid}
+0   long     0x0a324655  _UF2 Image format,, Magic start 0,, 
+>4  long     x           Magic start 1,
+>8  long     x           Flags,
+>12 long     x           Base,
+>16 long     x           Payload size,
+>20 long     x           Block number,
+>24 long     x           Number of blocks,
+>28 long     x           Family ID OR file size,
+>28 long     =0xe48bff56   Arm, Raspberry Pi Foundation, RP2040
+>28 long     =0x5ee21072   Arm, ST, STM32F1
+>28 long     =0xada52840   Arm, Nordic, NRF52840
+>28 long     =0x16573617   Arm,Microchip,(Atmel) SAMD21
+>28 long     =0x1851780a   Arm,Microchip,(Atmel) SAMD51
+>28 long     =0x1b57745f   Arm,Nordic,NRF52
+>28 long     =0x1c5f21b0   Arm,ESP32,ESP32
+>28 long     =0x1e1f432d   Arm,ST,STM32L1xx
+>28 long     =0x202e3a91   Arm,ST,STM32L0xx
+>28 long     =0x21460ff0   Arm,ST,STM32WLxx
+>28 long     =0x2abc77ec   Arm,NXP,LPC55xx
+>28 long     =0x300f5633   Arm,ST,STM32G0xx
+>28 long     =0x31d228c6   Arm,GigaDevice,GD32F350
+>28 long     =0x04240bdf   Arm,ST,STM32L5xx
+>28 long     =0x4c71240a   Arm,ST,STM32G4xx
+>28 long     =0x4fb2d5bd   Arm,NXP,RT10XX
+>28 long     =0x53b80f00   Arm,ST,STM32F7xx
+>28 long     =0x55114460   Arm,Microchip,SAMD51
+>28 long     =0x57755a57   Arm,ST,STM32F4xx
+>28 long     =0x5a18069b   Arm,Cypress,FX2
+>28 long     =0x5d1a0a2e   Arm,ST,STM32F2xx
+>28 long     =0x621e937a   Arm,Nordic,NRF52833
+>28 long     =0x647824b6   Arm,ST,STM32F0xx
+>28 long     =0x68ed2b88   Arm,Microchip,SAMD21
+>28 long     =0x6b846188   Arm,ST,STM32F3xx
+>28 long     =0x6d0922fa   Arm,ST,STM32F407
+>28 long     =0x6db66082   Arm,ST,STM32H7xx
+>28 long     =0x70d16653   Arm,ST,STM32WBxx
+>28 long     =0x7eab61ed   Arm,ESP8266,ESP8266
+>28 long     =0x7f83e793   Arm,NXP,KL32L2x
+>28 long     =0x8fb060fe   Arm,ST,STM32F407VG
+>28 long     =0xbfdd4eee   Arm,ESP32,ESP32-S2
+>28 long     =0xc47e5767   Arm,ESP32,ESP32-S3
+>28 long     =0xd42ba06c   Arm,ESP32,ESP32-C3
+>28 long     =0x2b88d29c   Arm,ESP32,ESP32-C2
+>28 long     =0x332726f6   Arm,ESP32,ESP32-H2
+>28 long     =0x540ddf62   Arm,ESP32,ESP32-C6
+>28 long     =0x3d308e94   Arm,ESP32,ESP32-P4
+>28 long     =0x00ff6919   Arm,ST,STM32L4xx
+>28 long     =0x9af03e33   Arm,GigaDevice,GD32VF103
+>28 long     =0x4f6ace52   Arm,LISTENAI,CSK300x/400x
+>28 long     =0x6e7348a8   Arm,LISTENAI,CSK60xx
+>28 long     =0x11de784a   Arm,M0SENSE,BL702
+>28 long     =0x4b684d71   Arm,Sipeed,MaixPlay-U4(BL618)
+>28 long     =0x9517422f   Arm,Renesas,RZ/A1LU (R7S7210xx)
+>28 long     =0x2dc309c5   Arm,ST,STM32F411xE
+>28 long     =0x06d1097b   Arm,ST,STM32F411xC
+>28 long     =0x72721d4e   Arm,Nordic,NRF52832xxAA
+>28 long     =0x6f752678   Arm,Nordic,NRF52832xxAB
+# >508 long    !0x0AB16F30 {invalid}
 
 ## Opulink OTA signature
 0    string    sATO     _Opulink,OPL1000,OTA firmware, arm, {location:0x3000}
->4   uleshort  x        project id %x,
->6   uleshort  x        chip id %x,
->8   uleshort  x        firmware id %x,
->10  uleshort  x        sequence number %x,
->12  ulelong   x        image size %x,
->16  ulelong   x        image checksum %x,
->20  ulelong   x        header checksum %x,
+>4   short  x        project id,
+>6   short  x        chip id,
+>8   short  x        firmware id,
+>10  short  x        sequence number,
+>12  long   x        image size,
+>16  long   x        image checksum,
+>20  long   x        header checksum,
 
-
-# Arm Cotex-M raw image, more check implemented in plugin
-3    byte      0x20     _ARM,,Vector Table for little endian,
-# MSP should be 0x1FFF0000 - 0x20200000 and LSB be b'00
->0   ulelong   >0x20200000    {invalid}
->0   ulelong&3 !0x00          {invalid}
-
-2    uleshort      0x1FFF     _ARM,,Vector Table for little endian,
-# MSP should be 0x1FFF0000 - 0x20200000 and LSB be b'00
->0   ulelong   >0x20200000    {invalid}
->0   ulelong&3 !0x00          {invalid}
-
-
-# Microchip PIC32M MIPS32
-0       regex   (?:\x00{4}\x00\x60\x1a\x40).                           _Microchip, PIC32M, MIPS32 Architecture BootFlash Section, MIPS
-# jal opcode  000011
->-1     ubyte   <0x0c                                                  {invalid}
->-1     ubyte   >0x0f                                                  {invalid}
-
-
-# Microchip PIC32M MIPS32_MICRO
-0       regex   (?:\x00{4}\x4c\x03\xfc\x00).                            _Microchip, PIC32M, MIPS32 MicroMips Architecture BootFlash section, MIPS
-# jal instruction before 111101
->-3     ubyte    <0xf4                                                  {invalid}
->-3     ubyte    >0xf7    
                                              
 # SAMFW
-0       regex       SamFW             _SamFW firmware, , ,  {location:0}
+0       string       SamFW             _SamFW firmware, , ,   
 
 # UPG file
-0       regex       (2SWU3TXV|LoaderFileGen)       _UPG file, , , ,  {location:0}
->64     long        x                               Version,
+# 0       regex       (2SWU3TXV|LoaderFileGen)       _UPG file, , , ,   
+# >64     long        x                               Version,
 
 
 ## STM32
 # STM32WB
-0       ulelong         0x94448A29                                          _stm32, STM32WB, STM32WB binary file magic number, arm, {location:-4}
+0       long         0x94448A29                                          _stm32, STM32WB, STM32WB binary file magic number, arm, {location:-4}
+
 
 # SBSFU
 0       string          (SFU1|SFU2|SFU3)                                    _stm32, STM32L4/STM32L4+/STM32L0/STM32F4/STM32F7/STM32L1/STM32G0/STM32G4/STM32H7/STM32WB, Secure boot & secure firmware update software expansion for STM32Cube, arm, {locaton:0}
 
+
 ## Ubisys
 0       string          ubisys                                              _ubisys, , File header, , {location:0x14}
->7       ulong           x                                                   version,
+>7       long           x                                                   version,
+
 
 ## CSR
 0    string        CSR-dfu1       _CSR, CSR BlueCore, CSR DFU firmware update header, CSR, 
+
+
+## CSR 2
+0    string        CSR-dfu2       _CSR, CSR BlueCore, CSR DFU firmware update header, CSR, 
+

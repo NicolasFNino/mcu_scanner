@@ -77,7 +77,7 @@ pub fn extract_file() -> Vec<u8> {
         println!("Error: File content is empty. Unable to process the file.");
     }
 
-    file_content.truncate(64);
+    file_content.truncate(128);
     file_content
 }
 
