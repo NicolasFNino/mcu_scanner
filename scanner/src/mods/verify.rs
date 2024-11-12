@@ -49,14 +49,14 @@ impl Default for Field {
 }
 
 
-pub fn verify_file(contents: Vec<u8>) -> Vec<Vec<(String, String)>>{
+pub fn verify_file(file_name: String, contents: Vec<u8>) -> Vec<Vec<(String, String)>>{
     println!("\n3. Verifing the contents of the input file:");
     let mut signature_matches: Vec<Vec<(String, String)>> = Vec::new();
     let signatures = read_signatures();
 
     for entry in signatures {
         let mut mutable_content = contents.clone();
-        match_signature(entry, &mut mutable_content, &mut signature_matches);
+        match_signature(&file_name, entry, &mut mutable_content, &mut signature_matches);
     }
 
     // let calc_crc = calculate_crc(&contents);
@@ -74,7 +74,7 @@ pub fn verify_file(contents: Vec<u8>) -> Vec<Vec<(String, String)>>{
     signature_matches
 }
 
-fn match_signature(entry: Signature, file_content: &mut Vec<u8>, list_matches: &mut Vec<Vec<(String, String)>>) {
+fn match_signature(file_name: &String, entry: Signature, file_content: &mut Vec<u8>, list_matches: &mut Vec<Vec<(String, String)>>) {
     let mut is_valid = true;
     let mut current_match: Vec<(String, String)> = Vec::new();
     for field in entry.fields {
@@ -87,9 +87,9 @@ fn match_signature(entry: Signature, file_content: &mut Vec<u8>, list_matches: &
         let desc = field.description;
         match vtype {
             FieldType::Str => {
-                println!("Signature field is a string: {}", value);
+                // println!("Signature field is a string: {}", value);
                 if value.trim() == "x" {
-                    println!("Only for displaying purposes");
+                    // println!("Only for displaying purposes");
                     if desc.trim() == "OTA header string," {
                         let string = String::from_utf8_lossy(&file_content[pos..pos+32]);
                         current_match.push((desc, string.to_string()));
@@ -106,7 +106,7 @@ fn match_signature(entry: Signature, file_content: &mut Vec<u8>, list_matches: &
                             if *character == value.as_bytes()[index] {
                                 // println!("Char match!");
                             } else {
-                                println!("Signature match failed:\n\t{} != {}", *character, value.as_bytes()[index]);
+                                // println!("Signature match failed:\n\t{} != {}", *character, value.as_bytes()[index]);
                                 is_valid = false;
                             }
                         }
@@ -121,22 +121,22 @@ fn match_signature(entry: Signature, file_content: &mut Vec<u8>, list_matches: &
                 
             },
             FieldType::Byte => {
-                println!("Signature field is a byte:");
-                println!("{}", value);
+                // println!("Signature field is a byte:");
+                // println!("{}", value);
                 if value.trim() == "x" {
-                    println!("Only for displaying purposes");
+                    // println!("Only for displaying purposes");
                     current_match.push((desc, format!("{}", file_content[pos])));
                 } else  {
                     let byte_value = u8::from_str_radix(&value, 16);
                     match byte_value {
                         Ok(byte) => {
-                            println!("The byte value is: 0x{:X}", byte); // Prints: The byte value is: 0xE9
+                            // println!("The byte value is: 0x{:X}", byte);
                             if file_content[pos] == byte 
                             {
-                                println!("Byte match!");
+                                // println!("Byte match!");
                                 current_match.push((desc, format!("{}", byte)));
                             } else {
-                                println!("Not a match!");
+                                // println!("Not a match!");
                                 is_valid = false;
                             }
                         }
@@ -150,7 +150,7 @@ fn match_signature(entry: Signature, file_content: &mut Vec<u8>, list_matches: &
                 
             },
             FieldType::Short => {
-                println!("Signature field is a short:");
+                // println!("Signature field is a short:");
                 if value == 'x'.to_string() {
                     let in_file = &file_content[pos..pos+2];
                     if desc.trim() == "Header size," {
@@ -159,7 +159,7 @@ fn match_signature(entry: Signature, file_content: &mut Vec<u8>, list_matches: &
 
                         // Convert the bytes to a 32-bit unsigned integer (little-endian)
                         let size = u16::from_le_bytes(size);
-                        println!("Size in file: {}", size);
+                        // println!("Size in file: {}", size);
 
                         //Add it to the curretn signature match fields
                         current_match.push((desc, format!("{} bytes", size)));
@@ -171,12 +171,12 @@ fn match_signature(entry: Signature, file_content: &mut Vec<u8>, list_matches: &
                         let size_value: u16 = u16::from_le_bytes(size);
                         let final_size: u32 = size_value as u32 * 4;
 
-                        println!("Size in file: {}", final_size);
+                        // println!("Size in file: {}", final_size);
 
                         //Add it to the curretn signature match fields
                         current_match.push((desc, format!("{} bytes", final_size)));
                     } else {
-                        println!("Only for displaying purposes");
+                        // println!("Only for displaying purposes");
                         let in_file = &file_content[pos..pos+2];
                         let hex_string: String = in_file
                                 .iter()
@@ -188,9 +188,9 @@ fn match_signature(entry: Signature, file_content: &mut Vec<u8>, list_matches: &
                 }
             }
             FieldType::Long => {
-                println!("Signature field is a long:");
+                // println!("Signature field is a long:");
                 if value == 'x'.to_string() {
-                    println!("Only for displaying purposes");
+                    // println!("Only for displaying purposes");
                     let in_file = &file_content[pos..pos+4];
                     if desc.trim() == "File size," {
                         // Convert the slice into an array of 4 bytes
@@ -198,12 +198,20 @@ fn match_signature(entry: Signature, file_content: &mut Vec<u8>, list_matches: &
 
                         // Convert the bytes to a 32-bit unsigned integer (little-endian)
                         let size = u32::from_le_bytes(size);
-                        println!("Size in file: {}", size);
+                        // println!("Size in file: {}", size);
 
-                        // TODO: Check file size
+                        // Check file size
+                        let size_result = verify_with_size(&file_name, size as usize);
+                        match size_result {
+                            Ok(true) => {
+                                //Add it to the curretn signature match fields
+                                current_match.push((desc, format!("{} bytes", size)));
+                            },
+                            _ => {
+                                is_valid =  false;
 
-                        //Add it to the curretn signature match fields
-                        current_match.push((desc, format!("{} bytes", size)));
+                            }
+                        }
                     }      
                     else if desc.trim() == "Code size," {
                         // Convert the slice into an array of 4 bytes
@@ -211,19 +219,30 @@ fn match_signature(entry: Signature, file_content: &mut Vec<u8>, list_matches: &
 
                         // Convert the bytes to a 32-bit unsigned integer (little-endian) + 64 to account for the header size
                         let size = u32::from_le_bytes(size) + 64;
-                        println!("Size in file: {}", size);
+                        // println!("Size in file: {}", size);
 
                         // TODO: Check file size
+                        let size_result = verify_with_size(&file_name, size as usize);
+                        match size_result {
+                            Ok(true) => {
+                                //Add it to the curretn signature match fields
+                                current_match.push((desc, format!("{} bytes", size)));
+                            },
+                            _ => {
+                                is_valid =  false;
+
+                            }
+                        }
 
                         //Add it to the curretn signature match fields
-                        current_match.push((desc, format!("{} bytes", size)));
+                        //current_match.push((desc, format!("{} bytes", size)));
                     } else if desc.trim() == "Header size," {
                         // Convert the slice into an array of 4 bytes
                         let size = in_file.try_into().expect("Failed to convert slice to array");
 
                         // Convert the bytes to a 32-bit unsigned integer (little-endian)
                         let size = u32::from_be_bytes(size);
-                        println!("Size in file: {}", size);
+                        // println!("Size in file: {}", size);
 
                         // TODO: Check file size
 
@@ -254,7 +273,7 @@ fn match_signature(entry: Signature, file_content: &mut Vec<u8>, list_matches: &
                         }
                     }
 
-                    println!("Byte array: {:?}", bytes); // Prints: Byte array: [60, 184, 243, 150]
+                    // println!("Byte array: {:?}", bytes);
 
                     if file_content[pos..pos+4] != bytes[..] {
                         is_valid = false;
@@ -291,31 +310,31 @@ fn read_signatures() -> Vec<Signature> {
             if line.as_str().starts_with("#") || line.len() == 0 {
                 // Ignore the lines that start with #
                 if line.as_str().starts_with(" ") || line.as_str().starts_with("\n") || line.len() == 0 {
-                    println!("EOS LINE:\n{}", line);
+                    // println!("EOS LINE:\n{}", line);
                     if fields_to_add.len() > 0 {
                         let current_signature = Signature {
                             fields: fields_to_add.clone()
                         };
-                        println!("{:#?}", current_signature);
+                        // println!("{:#?}", current_signature);
                         
                         results.push(current_signature);
                         fields_to_add.clear();
                     }
 
                 } else {
-                    println!("ELSE: {}", line)
+                    // println!("ELSE: {}", line)
                 }
                 
             } else {
                 // Here is where the signature population should happen
-                println!("GOOD LINE:\n{}", line);
+                // println!("GOOD LINE:\n{}", line);
                 //println!("Line:\n{:#?}", line.as_bytes());
 
                 let split = re.splitn(&line, 4);
 
                 for (index, item) in split.enumerate() {
                     //println!("\n==========\nITEM: {:#?}\n==========\n", item.as_bytes());
-                    println!("\n==========\nITEM: {}\n==========\n", item);
+                    // println!("\n==========\nITEM: {}\n==========\n", item);
                     match index {
                         0 => {
                             let mut num: usize  = 0;
@@ -324,15 +343,15 @@ fn read_signatures() -> Vec<Signature> {
                                 if let Some(captures) = re.captures(item.trim()) {
                                     // Extract the number
                                     let number = &captures[1];
-                                    println!("Matched number: {}", number);
+                                    // println!("Matched number: {}", number);
                                     num = number.trim().parse().expect("Not a valid number!");
                                     
                                 } else {
-                                    println!("No match found");
+                                    // println!("No match found");
                                 }
                                 
                             } else if item.is_empty() {
-                                println!("Empty item");
+                                // println!("Empty item");
                             } else {
                                 num = item.trim().parse().expect("Not a valid number!");
                             }
@@ -389,7 +408,7 @@ pub fn verify_with_size(file_path: &str, expected_size: usize) -> std::io::Resul
 } //verify_with_size
 
 pub fn print_data(sig_matches: Vec<Vec<(String, String)>>) {
-    println!("\n4. This is the information that you are interested in: ");
+    println!("\n4. This is the information that you were looking for: ");
     println!("{:#?}", sig_matches);
 }
 

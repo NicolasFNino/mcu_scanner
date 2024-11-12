@@ -12,7 +12,7 @@ use std::path::Path;
 
 
 
-pub fn extract_file() -> Vec<u8> {
+pub fn extract_file() -> (String, Vec<u8>) {
     let mut file_path = String::new();
     let mut file_content = Vec::new();
 
@@ -78,7 +78,7 @@ pub fn extract_file() -> Vec<u8> {
     }
 
     file_content.truncate(128);
-    file_content
+    return (file_path, file_content)
 }
 
 

@@ -171,7 +171,7 @@
 >4  long     x           The destination address of the image x%x,
 >8  short    x           Header size,
 >10 short    x           Size of protected TLV area bytes x%x,
->12 long     x           Code size,
+>12 long     x           Code Size,
 >16 long     x           Header flags,
 #>19 byte       =0x04       Encrypted image (AES128),
 #>19 byte       =0x08       Encrypted image (AES128),
@@ -185,7 +185,7 @@
 >4  long     x           Base,
 >8  short    x           Header size,
 >10 short    x           Size of protected TLV area bytes x%x,
->12 long     x           Code size,
+>12 long     x           Code Size,
 >16 long     x           Header flags,
 >20 long      x           Image version
 >20 byte       x           Major version,
