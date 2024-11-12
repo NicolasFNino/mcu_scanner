@@ -50,5 +50,12 @@ We will be using the following dependencies in our project:
 5. ripdrag
 	- We will be using ripdrag as a dependency so that the user can drag and drop files into their terminal for the firmware instead of providing the file path.
 
+## How To Use:
+1. Running the program with 'cargo run'
+	- Will require you to input the absolute path of the file you wish to analyze
+2. Running the program by pipping the output of ripdrag will allow you to drag and drop the file you wish to analyze.
+	- example: 'ripdrag samples/* -x -I | cargo run'
+	- where 'samples' is the relative path of the directory containing the files you wish to analyze
+
 
  

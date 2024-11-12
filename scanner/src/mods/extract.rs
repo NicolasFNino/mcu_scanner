@@ -1,5 +1,5 @@
 use std::fs::File;
-use std::io::{Read, BufReader};
+use std::io::{self, Read, BufReader};
 use std::collections::HashMap;
 use std::num::ParseIntError;
 extern crate bin_file;
@@ -7,27 +7,46 @@ extern crate entropy;
 use shannon_entropy::shannon_entropy;
 use flate2::read::GzDecoder;
 use zip::ZipArchive;
+use atty;
 use std::path::Path;
 
 
 
-pub fn extract_file() -> Vec<u8>{
-    
+pub fn extract_file() -> Vec<u8> {
     let mut file_path = String::new();
     let mut file_content = Vec::new();
 
-    loop {
-        println!("\n1. Please type the absolute path to your input file:");
+    // check if input is from interactive input or piped
+    let stdin_is_tty = atty::is(atty::Stream::Stdin);
 
-        file_path = text_io::read!("{}");
+    if !stdin_is_tty {
+        // read the input from stdin if piped
+        io::stdin().read_to_string(&mut file_path).expect("Failed to read from stdin");
+        file_path = file_path.trim().to_string(); // trim away extra whitespace
+    }
+
+    loop {
+        if stdin_is_tty {
+            // ask for file path if in interactive mode
+            println!("\n1. Please type the absolute path to your input file:");
+            file_path = text_io::read!("{}");
+        }
+
+        // pipping will usually add quotes so this is to trim those off
+        file_path = file_path.trim_matches('"').trim_matches('\'').to_string();
 
         file_content = read_firmware(file_path.as_str());
-    
+
         if file_content.is_empty() {
-            println!("error - trying again!");
-            continue;
+            if stdin_is_tty {
+                println!("Error - trying again!");
+            } else {
+                println!("Error: Failed to read file or file is empty.");
+                break;
+            }
+        } else {
+            break;
         }
-        break;
     }
 
     // Printing the contents of the file. Only for debugging
@@ -35,28 +54,33 @@ pub fn extract_file() -> Vec<u8>{
     // for byte in &file_content {
     //     println!("{:#04X?}", byte)
     // }
-     
+
     println!("\n2. Extracting or decoding the contents of the input file:");
 
-    // TODO: Actually check here if we need to convert from srec/intel_hex/zip/gz/etc... to bin, convert it and return the first 64/128 bytes
-    if file_content[0] == b':' {
-        println!("intel->binary");
-        file_content = intel_hex_to_binary(&file_content).unwrap_or(Vec::new());
-    } else if file_content[0] == b'S' {
-        println!("SREC -> binary");
-        file_content = srec_to_binary(&file_content).unwrap_or(Vec::new());
-    } else if file_path.ends_with(".gz") {
-        println!("GZ -> binary");
-        file_content = decompress_gz(file_path.as_str()).unwrap_or(Vec::new());
-    } else if file_path.ends_with(".zip") {
-        println!("ZIP -> binary");
-        file_content = extract_zip(file_path.as_str()).unwrap_or(Vec::new());
-    } else{
-        println!("unknwon so assumed binary");
-    } //add other checks to this for zip and gz and anything else that needs to be done
+    if !file_content.is_empty() {
+        if file_content[0] == b':' {
+            println!("intel->binary");
+            file_content = intel_hex_to_binary(&file_content).unwrap_or(Vec::new());
+        } else if file_content[0] == b'S' {
+            println!("SREC -> binary");
+            file_content = srec_to_binary(&file_content).unwrap_or(Vec::new());
+        } else if file_path.ends_with(".gz") {
+            println!("GZ -> binary");
+            file_content = decompress_gz(file_path.as_str()).unwrap_or(Vec::new());
+        } else if file_path.ends_with(".zip") {
+            println!("ZIP -> binary");
+            file_content = extract_zip(file_path.as_str()).unwrap_or(Vec::new());
+        } else {
+            println!("unknown format, assuming binary");
+        }
+    } else {
+        println!("Error: File content is empty. Unable to process the file.");
+    }
+
     file_content.truncate(64);
     file_content
 }
+
 
 fn intel_hex_to_binary(data: &[u8]) -> Result<Vec<u8>, ParseIntError> {
     let data_str = String::from_utf8_lossy(data);
