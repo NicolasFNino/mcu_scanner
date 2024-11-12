@@ -40,9 +40,75 @@ pub fn extract_file() -> Vec<u8>{
         
     }else if file_content[0] == b'S' {
         println!("SREC -> binary");
-    }
+    }else{
+        println!("unknwon so assumed binary");
+    } //add other checks to this for zip and gz and anything else that needs to be done
     file_content.truncate(64);
     file_content
+}
+
+fn intel_hex_to_binary(data: &[u8]) -> Result<Vec<u8>, ParseIntError> {
+    let data_str = String::from_utf8_lossy(data);
+    let mut binary_data = Vec::new();
+
+    for line in data_str.lines() {
+        if line.starts_with(':') {
+            let bytes = parse_hex_record(line)?;
+            binary_data.extend(bytes);
+        }
+    }
+
+    Ok(binary_data)
+}
+
+fn parse_hex_record(record: &str) -> Result<Vec<u8>, ParseIntError> {
+    let mut binary_data = Vec::new();
+    let record_len = u8::from_str_radix(&record[1..3], 16)?;
+    let address = u16::from_str_radix(&record[3..7], 16)?;
+    let record_type = u8::from_str_radix(&record[7..9], 16)?;
+    let mut data_idx = 9;
+    if record_type == 0x00 {
+        for _ in 0..record_len {
+            let byte = u8::from_str_radix(&record[data_idx..data_idx + 2], 16)?;
+            binary_data.push(byte);
+            data_idx += 2;
+        }
+    }
+    Ok(binary_data)
+}
+
+fn srec_to_binary(data: &[u8]) -> Result<Vec<u8>, ParseIntError> {
+    let data_str = String::from_utf8_lossy(data);
+    let mut binary_data = Vec::new();
+    for line in data_str.lines() {
+        if line.starts_with('S') {
+            let bytes = parse_srec_record(line)?;
+            binary_data.extend(bytes);
+        }
+    }
+    Ok(binary_data)
+}
+
+fn parse_srec_record(record: &str) -> Result<Vec<u8>, ParseIntError> {
+    let mut binary_data = Vec::new();
+    let record_type = &record[1..2];
+    let count = u8::from_str_radix(&record[2..4], 16)?;
+    let mut data_idx = 4;
+    if record_type == "1" || record_type == "2" || record_type == "3" {
+        let address_len = match record_type {
+            "1" => 4, 
+            "2" => 6,
+            "3" => 8,  
+            _ => 0,
+        };
+        data_idx += address_len;  
+        while data_idx < (4 + count as usize * 2) - 2 {
+            let byte = u8::from_str_radix(&record[data_idx..data_idx + 2], 16)?;
+            binary_data.push(byte);
+            data_idx += 2;
+        }
+    }
+    Ok(binary_data)
 }
 
 
@@ -111,3 +177,5 @@ pub fn read_firmware<'a>(file_path: &'a str) -> Vec<u8> {
         } 
     }
 }
+
+
