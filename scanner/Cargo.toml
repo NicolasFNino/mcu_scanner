@@ -10,4 +10,7 @@ bin_file = "0.1.1"
 crc = "3.2.1"
 regex = "1.11.0"
 shannon-entropy = "0.2"
+flate2 = "1.0" 
+zip = "0.5"  
+
 
