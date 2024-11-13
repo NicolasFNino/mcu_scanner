@@ -1,6 +1,5 @@
 use std::fs::File;
 use std::io::{self, Read, BufReader};
-use std::collections::HashMap;
 use std::num::ParseIntError;
 extern crate bin_file;
 extern crate entropy;
@@ -8,7 +7,6 @@ use shannon_entropy::shannon_entropy;
 use flate2::read::GzDecoder;
 use zip::ZipArchive;
 use atty;
-use std::path::Path;
 
 
 
@@ -35,8 +33,10 @@ pub fn extract_file() -> (String, Vec<u8>) {
         // pipping will usually add quotes so this is to trim those off
         file_path = file_path.trim_matches('"').trim_matches('\'').to_string();
 
+        // Get the contents of the file and store it in the vector of u8 values
         file_content = read_firmware(file_path.as_str());
 
+        // Try again if nothing could be retrieved from the path provided by the user
         if file_content.is_empty() {
             if stdin_is_tty {
                 println!("Error - trying again!");
@@ -77,11 +77,12 @@ pub fn extract_file() -> (String, Vec<u8>) {
         println!("Error: File content is empty. Unable to process the file.");
     }
 
+    // Get the first 128 bytes from the file for performance 
     file_content.truncate(128);
     return (file_path, file_content)
 }
 
-
+// Decode a hex file to binary representation
 fn intel_hex_to_binary(data: &[u8]) -> Result<Vec<u8>, ParseIntError> {
     let data_str = String::from_utf8_lossy(data);
     let mut binary_data = Vec::new();
@@ -94,6 +95,7 @@ fn intel_hex_to_binary(data: &[u8]) -> Result<Vec<u8>, ParseIntError> {
     Ok(binary_data)
 }
 
+// Helper method for the intel_hex_to_binary method
 fn parse_hex_data(datahex: &str) -> Result<Vec<u8>, ParseIntError> {
     let mut binary_data = Vec::new();
     let datahex_len = u8::from_str_radix(&datahex[1..3], 16)?;
@@ -110,7 +112,7 @@ fn parse_hex_data(datahex: &str) -> Result<Vec<u8>, ParseIntError> {
     Ok(binary_data)
 }
 
-
+// Decode Motorola SRecord fole to binary representation
 fn srec_to_binary(data: &[u8]) -> Result<Vec<u8>, ParseIntError> {
     let data_str = String::from_utf8_lossy(data);
     let mut binary_data = Vec::new();
@@ -123,6 +125,7 @@ fn srec_to_binary(data: &[u8]) -> Result<Vec<u8>, ParseIntError> {
     Ok(binary_data)
 }
 
+// Helper method for the srec_to_binary method
 fn parse_srec_data(datasrec: &str) -> Result<Vec<u8>, ParseIntError> {
     let mut binary_data = Vec::new();
     let datasrec_type = &datasrec[1..2];
@@ -145,6 +148,7 @@ fn parse_srec_data(datasrec: &str) -> Result<Vec<u8>, ParseIntError> {
     Ok(binary_data)
 }
 
+// Decompress gz file
 fn decompress_gz(file_path: &str) -> Result<Vec<u8>, std::io::Error> {
     let file = File::open(file_path)?;
     let mut gz = GzDecoder::new(file);
@@ -153,6 +157,7 @@ fn decompress_gz(file_path: &str) -> Result<Vec<u8>, std::io::Error> {
     Ok(binary_data)
 }
 
+// Decompress zip file
 fn extract_zip(file_path: &str) -> Result<Vec<u8>, std::io::Error> {
     let file = File::open(file_path)?;
     let mut archive = ZipArchive::new(file)?;
@@ -216,7 +221,7 @@ pub fn calculate_file_entropy(file_path: &str) -> Result<f32, std::io::Error> {
 
 
 
-//idk if this signature is correct - not sure if lifetime is correct/needed
+// Helper method to get the file contents and return it as a Vector of u8 values
 pub fn read_firmware<'a>(file_path: &'a str) -> Vec<u8> {
     //try to open with file path
     match std::fs::read(file_path) {

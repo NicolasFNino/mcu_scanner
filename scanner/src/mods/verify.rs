@@ -1,11 +1,5 @@
 use std::{fs::File, io::{BufRead, BufReader, Lines, Result}, path::Path};
 
-// TODO: The structures should be much more complex
-//
-// We need to have a criteria to 'discard' a signature based on each field
-// examples: 1. file size is negative
-//           2. a field value is not valid for the signature that is supposed to be a part of
-//
 extern crate crc;
 const X25: crc::Crc<u16> = crc::Crc::<u16>::new(&crc::CRC_16_IBM_SDLC);
 
@@ -48,7 +42,7 @@ impl Default for Field {
     }
 }
 
-
+// Entry point of this file. Takes a file and outputs the information extracted from the signature
 pub fn verify_file(file_name: String, contents: Vec<u8>) -> Vec<Vec<(String, String)>>{
     println!("\n3. Verifing the contents of the input file:");
     let mut signature_matches: Vec<Vec<(String, String)>> = Vec::new();
@@ -74,6 +68,7 @@ pub fn verify_file(file_name: String, contents: Vec<u8>) -> Vec<Vec<(String, Str
     signature_matches
 }
 
+// Takes a signature and file content and extracts the relevant information
 fn match_signature(file_name: &String, entry: Signature, file_content: &mut Vec<u8>, list_matches: &mut Vec<Vec<(String, String)>>) {
     let mut is_valid = true;
     let mut current_match: Vec<(String, String)> = Vec::new();
@@ -122,7 +117,6 @@ fn match_signature(file_name: &String, entry: Signature, file_content: &mut Vec<
             },
             FieldType::Byte => {
                 // println!("Signature field is a byte:");
-                // println!("{}", value);
                 if value.trim() == "x" {
                     // println!("Only for displaying purposes");
                     current_match.push((desc, format!("{}", file_content[pos])));
@@ -288,11 +282,13 @@ fn match_signature(file_name: &String, entry: Signature, file_content: &mut Vec<
             }
         }
     }
+    // If the signature is still valid after going through all fields, lets add it to our result list.
     if is_valid {
         list_matches.push(current_match);
     }
 }
 
+// Read the file containing the signatures information to match them against the target firmware
 fn read_signatures() -> Vec<Signature> {
     let mut results = Vec::new();
 
@@ -326,7 +322,6 @@ fn read_signatures() -> Vec<Signature> {
                 }
                 
             } else {
-                // Here is where the signature population should happen
                 // println!("GOOD LINE:\n{}", line);
                 //println!("Line:\n{:#?}", line.as_bytes());
 
@@ -389,7 +384,7 @@ fn calculate_crc(contents: &[u8]) -> u16 {
     X25.checksum(contents)
 }
 
-//need to make sure this signature is correct
+// Method to match the file size reported in the signature and the one calculated from the file
 pub fn verify_with_size(file_path: &str, expected_size: usize) -> std::io::Result<bool> {
     let file = std::fs::read(file_path)?;
     if file.len() != expected_size {
@@ -407,11 +402,13 @@ pub fn verify_with_size(file_path: &str, expected_size: usize) -> std::io::Resul
     //Ok(true);
 } //verify_with_size
 
+// Prints the data from the matched signatures
 pub fn print_data(sig_matches: Vec<Vec<(String, String)>>) {
     println!("\n4. This is the information that you were looking for: ");
     println!("{:#?}", sig_matches);
 }
 
+// Helper method to read the lines of the signatures file
 fn read_lines<P>(filename: P) -> Result<Lines<BufReader<File>>>
 where P: AsRef<Path>, {
     let file = File::open(filename)?;
