@@ -53,9 +53,10 @@ We will be using the following dependencies in our project:
 ## How To Use:
 1. Running the program with 'cargo run'
 	- Will require you to input the absolute path of the file you wish to analyze
-2. Running the program by pipping the output of ripdrag will allow you to drag and drop the file you wish to analyze.
-	- example: 'ripdrag samples/* -x -I | cargo run'
-	- where 'samples' is the relative path of the directory containing the files you wish to analyze
+2. Running the program using ripdrag will allow you to drag and drop the file you wish to analyze.
+	- Run the program as normal in one terminal
+	- In a separate terminal navigate to the directory with your samples and input "ripdrag -x *"
+	- Return to the first terminal and drop the file from the spawned menu into the terminal
 
 
  
