@@ -236,3 +236,19 @@ pub fn read_firmware<'a>(file_path: &'a str) -> Vec<u8> {
 }
 
 
+#[cfg(test)]
+mod tests{
+    use super::*;
+
+    #[test]
+    fn test_read_firmware_no_file() {
+        let result = read_firmware("");
+        assert_eq!(result.is_empty(), true);
+    }
+
+    #[test]
+    fn test_read_firmware() {
+        let result = read_firmware("test_files/fw.bin");
+        assert_eq!(result, vec![97,97,97,97]);
+    }
+}
