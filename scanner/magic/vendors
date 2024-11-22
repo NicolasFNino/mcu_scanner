@@ -23,8 +23,8 @@
 >0   short    x        CRC,
 >2   short    x        CRC:Shadow # Let's be conservative for now. Don't miss valid ones.
 >4   short    x        Version,
->6   short*4    x        Length,
->12  short*4    x        Base, (reserved)
+>6   short    x        Length,
+>12  short    x        Base, (reserved)
 >14  byte     x        The type of image (reserved),
 # The state informs the bootloader whether or not the image is ready to run or currently running
 >15  byte     x        Run State (resevered),
@@ -63,13 +63,6 @@
 # 0       regex      \xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff[\x00-\xff]{3}\x20 _Ti,CC2640,off-chip OAD Image for V2.1.0/1,{overlap}{location:2}
 
 ## Dialog Dialog SUOTA Memory Layout for DA145xx 
-
-# Mutipart not strict just for two byte 
-# Ruibo, Multipart Image Header is supposed to be followed by the secondary bootloader. Could it be a raw ARM vector table?
-# Also, you can use Bytes 6-7 to verify the size of the following bytes.
-# need to rely the firmware itself is Dialog 
-# TODO: magic number too short and no other judgement 
-# must be at the beginning
 0    string    pP       _Dialog,DA145xx,Dialog SUOTA Multipart Image Header,, 
 >6   short  x        Code size,
 
@@ -112,10 +105,7 @@
 >5    string    x        EIVector,
 
 # ESP32/S2/S3/C2/C3/C6/H2/ESP8266 V1
-# TODO: fix the location 0 
-0     byte     0xe9     _ESP,,App Image Format,xtensa, 
-# segment number cannot be too much
-# TODO: set the value by user 
+0     byte     e9     _ESP,,App Image Format,xtensa, 
 >1    byte      x        segments,
 # SPI Flash Mode 
 # >2    byte     >3       {invalid}
@@ -276,10 +266,6 @@
 ## STM32
 # STM32WB
 0       long         0x94448A29                                          _stm32, STM32WB, STM32WB binary file magic number, arm, {location:-4}
-
-
-# SBSFU
-0       string          (SFU1|SFU2|SFU3)                                    _stm32, STM32L4/STM32L4+/STM32L0/STM32F4/STM32F7/STM32L1/STM32G0/STM32G4/STM32H7/STM32WB, Secure boot & secure firmware update software expansion for STM32Cube, arm, {locaton:0}
 
 
 ## Ubisys
