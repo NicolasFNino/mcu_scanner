@@ -18,9 +18,18 @@ pub fn extract_file() -> (String, Vec<u8>) {
     let stdin_is_tty = atty::is(atty::Stream::Stdin);
 
     if !stdin_is_tty {
-        // read the input from stdin if piped
-        io::stdin().read_to_string(&mut file_path).expect("Failed to read from stdin");
-        file_path = file_path.trim().to_string(); // trim away extra whitespace
+        // read the file content directly from stdin if piped
+        io::stdin()
+            .read_to_end(&mut file_content)
+            .expect("Failed to read from stdin");
+        
+        if !file_content.is_empty() {
+            println!("\nInput received from stdin.");
+        } else {
+            println!("Error: Failed to read input from stdin or input is empty.");
+        }
+
+        return ("<stdin>".to_string(), file_content);
     }
 
     loop {

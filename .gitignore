@@ -1,5 +1,6 @@
 scanner/debug/
 scanner/target/
+scanner/out/
 
 **/*.rs.bk
 
