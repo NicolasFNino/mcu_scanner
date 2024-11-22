@@ -5,7 +5,7 @@ FROM rust:latest
 COPY ./ ./
 
 # Build your program for release
-RUN cargo build --release
+RUN cargo build --release --bin scanner
 
 RUN mv /target/release/scanner /run_scanner
 
