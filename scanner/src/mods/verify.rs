@@ -195,7 +195,7 @@ fn match_signature(file_name: &String, entry: Signature, file_content: &mut Vec<
                         // println!("Size in file: {}", size);
 
                         // Check file size
-                        let size_result = verify_with_size(&file_name, size as usize);
+                        let size_result = verify_size(&file_name, size as usize);
                         match size_result {
                             Ok(true) => {
                                 //Add it to the curretn signature match fields
@@ -216,7 +216,7 @@ fn match_signature(file_name: &String, entry: Signature, file_content: &mut Vec<
                         // println!("Size in file: {}", size);
 
                         // TODO: Check file size
-                        let size_result = verify_with_size(&file_name, size as usize);
+                        let size_result = verify_size(&file_name, size as usize);
                         match size_result {
                             Ok(true) => {
                                 //Add it to the curretn signature match fields
@@ -385,7 +385,7 @@ fn calculate_crc(contents: &[u8]) -> u16 {
 }
 
 // Method to match the file size reported in the signature and the one calculated from the file
-pub fn verify_with_size(file_path: &str, expected_size: usize) -> std::io::Result<bool> {
+fn verify_size(file_path: &str, expected_size: usize) -> std::io::Result<bool> {
     let file = std::fs::read(file_path)?;
     if file.len() != expected_size {
         println!("file size doesnt match expected size");
@@ -394,13 +394,8 @@ pub fn verify_with_size(file_path: &str, expected_size: usize) -> std::io::Resul
     let checksum = X25.checksum(&file);
     println!("checksum: {:#X}", checksum);
     Ok(true)
-    //implementation for checking checksum but idk the actual checksum value we need to compare it to
-    // if let Some(expected) = expected_checksum {
-    //    println!("checksum doesnt match");
-    //    return Ok(false);
-    //} //if
-    //Ok(true);
-} //verify_with_size
+
+} //verify_size
 
 // Prints the data from the matched signatures
 pub fn print_data(sig_matches: Vec<Vec<(String, String)>>) {
@@ -413,4 +408,49 @@ fn read_lines<P>(filename: P) -> Result<Lines<BufReader<File>>>
 where P: AsRef<Path>, {
     let file = File::open(filename)?;
     Ok(BufReader::new(file).lines())
+}
+
+#[cfg(test)]
+mod tests{
+    use super::*;
+
+    #[test]
+    fn test_verify_size_no_file() {
+        let result = verify_size("", 4);
+        assert_eq!(result.is_err(), true);
+    }
+
+    #[test]
+    fn test_verify_size() {
+        let result = verify_size("test_files/fw.bin", 4);
+        assert_eq!(result.unwrap(), true);
+    }
+
+    #[test]
+    fn test_verify_size_false() {
+        let result = verify_size("test_files/fw.bin", 154);
+        assert_eq!(result.unwrap(), false);
+    }
+
+    #[test]
+    fn test_read_lines_no_file() {
+        let result = read_lines("");
+        assert_eq!(result.is_err(), true);
+    }
+
+    #[test]
+    fn test_read_lines() {
+        let result = read_lines("test_files/fw.bin").unwrap();
+        for line in result {
+            assert_eq!(line.unwrap(), "aaaa");
+        }
+    }
+
+    #[test]
+    fn test_read_lines_false() {
+        let result = read_lines("test_files/fw.bin").unwrap();
+        for line in result {
+            assert_ne!(line.unwrap(), "ferxxo");
+        }
+    }
 }

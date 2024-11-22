@@ -1,4 +1,14 @@
 # mcu_scanner  
+
+## How To Use:
+### Docker container:
+Once you run the container the program will start running as well.  
+1. `docker build --network=host -t scanner .`  
+2. `docker run --rm -it --name scanner1 scanner`   
+### Locally:  
+1. Running the program with 'cargo run'  
+	- Will require you to input the absolute path of the file you wish to analyze  
+
 ## Project overview:  
 
 The main goal of the project is to create a tool that analyzes Over-the-Air (OTA) firmware update images and identifying details about the vendor, chip, family, and architecture of the image. This tool would do this by reading metadata (image header) to identify the firmware, extract the metadata, and verify that the input binary file is a valid firmware image.  The two main functions this tool would allow for are to:  
@@ -38,25 +48,12 @@ The Last stage is the metadata extraction part, which is where we will be extrac
 
 
 ## Dependencies:  
-We will be using the following dependencies in our project:
-1. text_io
-	- We will be using this crate to get formatted user input; in extract.rs, we will be using it to ask the user for the file path of the firmare and read it directly from the command line.
-2. entropy-lib
-	- We will be using this crate to calculate the entropy of the files. We will be using it in extract.rs to figure out if there are any anomolies.
-3. bin_file
-	- We will be using this crate for handling binary files and making the process simpler so that we can read and process the raw binary data. This will take place in extract.rs, and we will use it mainly to extract metadata for verification.
-4. crc
-	- We will be using this crate for calculating the checksum to make sure that the data in the file is not corrupt in verify.rs.
-5. ripdrag
-	- We will be using ripdrag as a dependency so that the user can drag and drop files into their terminal for the firmware instead of providing the file path.
-
-## How To Use:
-1. Running the program with 'cargo run'
-	- Will require you to input the absolute path of the file you wish to analyze
-2. Running the program using ripdrag will allow you to drag and drop the file you wish to analyze.
-	- Run the program as normal in one terminal
-	- In a separate terminal navigate to the directory with your samples and input "ripdrag -x *"
-	- Return to the first terminal and drop the file from the spawned menu into the terminal
-
-
- 
+We will be using the following dependencies in our project:  
+1. text_io  
+	- We will be using this crate to get formatted user input; in extract.rs, we will be using it to ask the user for the file path of the firmare and read it directly from the command line.  
+2. entropy-lib  
+	- We will be using this crate to calculate the entropy of the files. We will be using it in extract.rs to figure out if there are any anomolies.  
+3. bin_file  
+	- We will be using this crate for handling binary files and making the process simpler so that we can read and process the raw binary data. This will take place in extract.rs, and we will use it mainly to extract metadata for verification.  
+4. crc  
+	- We will be using this crate for calculating the checksum to make sure that the data in the file is not corrupt in verify.rs.  
