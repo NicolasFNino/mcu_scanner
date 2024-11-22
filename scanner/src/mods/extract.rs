@@ -9,7 +9,6 @@ use zip::ZipArchive;
 use atty;
 
 
-
 pub fn extract_file() -> (String, Vec<u8>) {
     let mut file_path = String::new();
     let mut file_content = Vec::new();
@@ -60,9 +59,12 @@ pub fn extract_file() -> (String, Vec<u8>) {
                     println!("Maximum attempts reached. Aborting...");
                     break;
                 }
+
             }
         } else {
-            break;
+            if !is_encrypted(&file_path) {
+                break;
+            }
         }
     }
 
@@ -75,6 +77,7 @@ pub fn extract_file() -> (String, Vec<u8>) {
     println!("\n2. Extracting or decoding the contents of the input file:");
 
     if !file_content.is_empty() {
+
         if file_content[0] == b':' {
             println!("intel->binary");
             file_content = intel_hex_to_binary(&file_content).unwrap_or(Vec::new());
@@ -189,7 +192,7 @@ fn extract_zip(file_path: &str) -> Result<Vec<u8>, std::io::Error> {
     Ok(binary_data)
 }
 
-pub fn hex_str_to_binary(hex: &str) -> Result<Vec<u8>, std::num::ParseIntError> {
+fn hex_str_to_binary(hex: &str) -> Result<Vec<u8>, std::num::ParseIntError> {
     let hex = hex.trim_start_matches("0x");
 
     let hex = if hex.len() % 2 != 0 {
@@ -207,7 +210,7 @@ pub fn hex_str_to_binary(hex: &str) -> Result<Vec<u8>, std::num::ParseIntError> 
     Ok(binary_vec)
 }//end hex_str_to_binary
 
-pub fn hex_file_to_binary(file_path: &str) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
+fn hex_file_to_binary(file_path: &str) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
     let mut file = File::open(file_path)?; 
     let mut hex_data = String::new();
     file.read_to_string(&mut hex_data)?;
@@ -229,7 +232,7 @@ pub fn hex_file_to_binary(file_path: &str) -> Result<Vec<u8>, Box<dyn std::error
 }//end hex_file_to_binary
 
 
-pub fn calculate_file_entropy(file_path: &str) -> Result<f32, std::io::Error> {
+fn calculate_file_entropy(file_path: &str) -> Result<f32, std::io::Error> {
     let file = File::open(file_path)?; 
     let mut buf_reader = BufReader::new(file); 
     let mut buffer = Vec::new(); 
@@ -239,7 +242,23 @@ pub fn calculate_file_entropy(file_path: &str) -> Result<f32, std::io::Error> {
     Ok(entropy)
 }
 
+fn is_encrypted(file_path: &str) -> bool {
+    let entropy = calculate_file_entropy(&file_path);
 
+    match entropy {
+        Ok(numero) => {
+            if numero > 9.5 {
+                println!("This file is encrypted, entropy: {}\nAborting...", numero);
+                return true;
+            }
+        },
+        _ => {
+            println!("There was an error trying to calculate the entropy.\nAborting...");
+                return true;
+        }
+    }
+    return false;
+}
 
 // Helper method to get the file contents and return it as a Vector of u8 values
 pub fn read_firmware<'a>(file_path: &'a str) -> Vec<u8> {
@@ -271,4 +290,29 @@ mod tests{
         let result = read_firmware("test_files/fw.bin");
         assert_eq!(result, vec![97,97,97,97]);
     }
+
+    #[test]
+    fn test_is_encrypted() {
+        let result = is_encrypted("test_files/fw.bin");
+        assert_eq!(result, false);
+    }
+
+    #[test]
+    fn test_is_encrypted_no_file() {
+        let result = is_encrypted("");
+        assert_eq!(result, true);
+    }
+
+    #[test]
+    fn test_calculate_entropy() {
+        let result = calculate_file_entropy("test_files/fw.bin");
+        assert_eq!(result.unwrap(), 0f32);
+    }
+
+    #[test]
+    fn test_calculate_entropy_no_file() {
+        let result = calculate_file_entropy("");
+        assert_eq!(result.is_err(), true);
+    }
+
 }
