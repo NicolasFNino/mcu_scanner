@@ -170,7 +170,7 @@ fn extract_zip(file_path: &str) -> Result<Vec<u8>, std::io::Error> {
     Ok(binary_data)
 }
 
-pub fn hex_str_to_binary(hex: &str) -> Result<Vec<u8>, std::num::ParseIntError> {
+fn hex_str_to_binary(hex: &str) -> Result<Vec<u8>, std::num::ParseIntError> {
     let hex = hex.trim_start_matches("0x");
 
     let hex = if hex.len() % 2 != 0 {
@@ -188,7 +188,7 @@ pub fn hex_str_to_binary(hex: &str) -> Result<Vec<u8>, std::num::ParseIntError> 
     Ok(binary_vec)
 }//end hex_str_to_binary
 
-pub fn hex_file_to_binary(file_path: &str) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
+fn hex_file_to_binary(file_path: &str) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
     let mut file = File::open(file_path)?; 
     let mut hex_data = String::new();
     file.read_to_string(&mut hex_data)?;
@@ -268,4 +268,29 @@ mod tests{
         let result = read_firmware("test_files/fw.bin");
         assert_eq!(result, vec![97,97,97,97]);
     }
+
+    #[test]
+    fn test_is_encrypted() {
+        let result = is_encrypted("test_files/fw.bin");
+        assert_eq!(result, false);
+    }
+
+    #[test]
+    fn test_is_encrypted_no_file() {
+        let result = is_encrypted("");
+        assert_eq!(result, true);
+    }
+
+    #[test]
+    fn test_calculate_entropy() {
+        let result = calculate_file_entropy("test_files/fw.bin");
+        assert_eq!(result.unwrap(), 0f32);
+    }
+
+    #[test]
+    fn test_calculate_entropy_no_file() {
+        let result = calculate_file_entropy("");
+        assert_eq!(result.is_err(), true);
+    }
+
 }
