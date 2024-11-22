@@ -9,7 +9,6 @@ use zip::ZipArchive;
 use atty;
 
 
-
 pub fn extract_file() -> (String, Vec<u8>) {
     let mut file_path = String::new();
     let mut file_content = Vec::new();
@@ -42,10 +41,11 @@ pub fn extract_file() -> (String, Vec<u8>) {
                 println!("Error - trying again!");
             } else {
                 println!("Error: Failed to read file or file is empty.");
-                break;
             }
         } else {
-            break;
+            if !is_encrypted(&file_path) {
+                break;
+            }
         }
     }
 
@@ -58,6 +58,7 @@ pub fn extract_file() -> (String, Vec<u8>) {
     println!("\n2. Extracting or decoding the contents of the input file:");
 
     if !file_content.is_empty() {
+
         if file_content[0] == b':' {
             println!("intel->binary");
             file_content = intel_hex_to_binary(&file_content).unwrap_or(Vec::new());
@@ -209,7 +210,7 @@ pub fn hex_file_to_binary(file_path: &str) -> Result<Vec<u8>, Box<dyn std::error
 }//end hex_file_to_binary
 
 
-pub fn calculate_file_entropy(file_path: &str) -> Result<f32, std::io::Error> {
+fn calculate_file_entropy(file_path: &str) -> Result<f32, std::io::Error> {
     let file = File::open(file_path)?; 
     let mut buf_reader = BufReader::new(file); 
     let mut buffer = Vec::new(); 
@@ -219,7 +220,23 @@ pub fn calculate_file_entropy(file_path: &str) -> Result<f32, std::io::Error> {
     Ok(entropy)
 }
 
+fn is_encrypted(file_path: &str) -> bool {
+    let entropy = calculate_file_entropy(&file_path);
 
+    match entropy {
+        Ok(numero) => {
+            if numero > 9.5 {
+                println!("This file is encrypted, entropy: {}\nAborting...", numero);
+                return true;
+            }
+        },
+        _ => {
+            println!("There was an error trying to calculate the entropy.\nAborting...");
+                return true;
+        }
+    }
+    return false;
+}
 
 // Helper method to get the file contents and return it as a Vector of u8 values
 pub fn read_firmware<'a>(file_path: &'a str) -> Vec<u8> {
