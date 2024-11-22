@@ -20,7 +20,7 @@ use std::fs;
 pub fn print_list_inputs() {
 
     println!("\nSelect one of these files:");
-    match fs::read_dir("/samples/") {
+    match fs::read_dir("./samples/") {
         Ok(paths) => {
             for p in paths {
                 match p {
