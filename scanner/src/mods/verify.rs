@@ -68,10 +68,29 @@ pub fn verify_file(file_name: String, contents: Vec<u8>) -> Vec<Vec<(String, Str
     signature_matches
 }
 
+fn parse_description_str(description: &str) -> i32 {
+    if description.contains("strlen:") {
+        let mut result: Option<i32> = None;
+        let re = Regex::new(r"\{strlen:(\d+)\}").unwrap();
+        if let Some(captures) = re.captures(description) {
+            result = captures.get(1).map(|m| m.as_str().parse().unwrap());
+        } else {
+            result = None;
+        }
+
+        match result {
+            Some(number) => { return number },
+            None => { return 0 },
+        }
+    }
+    return 0;
+}
+
 // Takes a signature and file content and extracts the relevant information
 fn match_signature(file_name: &String, entry: Signature, file_content: &mut Vec<u8>, list_matches: &mut Vec<Vec<(String, String)>>) {
     let mut is_valid = true;
     let mut current_match: Vec<(String, String)> = Vec::new();
+    
     for field in entry.fields {
         if !is_valid {
             break;
@@ -80,25 +99,30 @@ fn match_signature(file_name: &String, entry: Signature, file_content: &mut Vec<
         let vtype = field.value_type;
         let value = field.constraint;
         let desc = field.description;
+
         match vtype {
             FieldType::Str => {
                 // println!("Signature field is a string: {}", value);
                 if value.trim() == "x" {
+
+                    let end_index = parse_description_str(&desc);
+
                     // println!("Only for displaying purposes");
                     if desc.trim() == "OTA header string," {
                         let string = String::from_utf8_lossy(&file_content[pos..pos+32]);
                         current_match.push((desc, string.to_string()));
                     } else {
-                        let string = String::from_utf8_lossy(&file_content[pos..pos+5]);
+                        let string = String::from_utf8_lossy(&file_content[pos..pos+end_index as usize]);
                         current_match.push((desc, string.to_string()));
                     }
                     
                 } else {
+
                     let end_index = value.len() + pos; 
                     if end_index < file_content.len() {
                         let slice = &file_content[pos..end_index];
                         for (index, character) in slice.iter().enumerate() {
-                            if *character == value.as_bytes()[index] {
+                            if *character == value.as_bytes()[index]{
                                 // println!("Char match!");
                             } else {
                                 // println!("Signature match failed:\n\t{} != {}", *character, value.as_bytes()[index]);
@@ -262,6 +286,7 @@ fn match_signature(file_name: &String, entry: Signature, file_content: &mut Vec<
                             Ok(byte) => bytes.push(byte),
                             Err(e) => {
                                 println!("Failed to parse '{}' as hex: {}", byte_str, e);
+                                println!("{}", desc);
                                 return;
                             }
                         }

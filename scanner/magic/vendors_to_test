@@ -1,25 +1,11 @@
-0   long     1ef1ee0b  _Zigbee,,OTA Header Format,, 
->4  byte       x           Major version,
->5  byte       x           Minor version, 
->6  short    x           Header size,
->8  short    x           Header bit control,
->10 short    x           Manufacturer code,
->12 short    x           Image type:       
-# >12 short    <0xffc0     Manufacturer specific,
-# >12 short    =0xffc0     Client security credentials,
-# >12 short    =0xffc1     Client configuration,
-# >12 short    =0xffc2     Server log,
-# >12 short    =0xffc3     Picture,
-# >12 short    =0xffff     Wildcard,
-# >12 short    >0xffc3     
-# >>12 short   <0xffff     Unknown type,
->14 long     x           File version,
->14 byte       x           Application release,
->15 byte       x           Application build,
->16 byte       x           Stack release,
->17 byte       x           Stack build,
->18 short    x           Zigbee stack version,
->20 string      x           OTA header string,
->52 long     x           file size,
+# cyacd2
+25    string    @APPINFO: _Cypress,Cypress,Bootloader Application and Code Data File Format cyacd2,arm, {strlen:2} # the strlen is for version
+>0    string    x        File Version {string}%s, {strlen:8}
+>2    string    x        SiliconID {string}%s, {strlen:2}
+>10   string    x        Silicon revision {string}%s, {strlen:2}
+>12   string    x        Checksum type {string}%s, {strlen:2}
+>14   string    x        App ID {string}%s, {strlen:8}
+>16   string    x        Product ID {string}%s,
+>35   string    x        (App Start,app length): (%s),
 
 
