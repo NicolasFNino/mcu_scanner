@@ -239,7 +239,7 @@ fn match_signature(file_name: &String, entry: Signature, file_content: &mut Vec<
                         let size = u32::from_le_bytes(size) + 64;
                         // println!("Size in file: {}", size);
 
-                        // TODO: Check file size
+                        // Check file size
                         let size_result = verify_size(&file_name, size as usize);
                         match size_result {
                             Ok(true) => {
@@ -261,8 +261,6 @@ fn match_signature(file_name: &String, entry: Signature, file_content: &mut Vec<
                         // Convert the bytes to a 32-bit unsigned integer (little-endian)
                         let size = u32::from_be_bytes(size);
                         // println!("Size in file: {}", size);
-
-                        // TODO: Check file size
 
                         //Add it to the curretn signature match fields
                         current_match.push((desc, format!("{} bytes", size)));
@@ -478,4 +476,23 @@ mod tests{
             assert_ne!(line.unwrap(), "ferxxo");
         }
     }
+
+    #[test]
+    fn test_parse_description_str() {
+        let result = parse_description_str("{strlen:45}");
+        assert_eq!(result, 45);
+    }
+
+    #[test]
+    fn test_parse_description_str_weird_number() {
+        let result = parse_description_str("{strlen:0045}");
+        assert_eq!(result, 45);
+    }
+
+    #[test]
+    fn test_parse_description_str_bad_input() {
+        let result = parse_description_str("pirlo");
+        assert_eq!(result, 0);
+    }
+    
 }
