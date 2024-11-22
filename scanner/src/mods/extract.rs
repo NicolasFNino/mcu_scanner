@@ -17,6 +17,10 @@ pub fn extract_file() -> (String, Vec<u8>) {
     // check if input is from interactive input or piped
     let stdin_is_tty = atty::is(atty::Stream::Stdin);
 
+    // Maximum number of attempts to prevent infinite loop
+    let max_attempts = 3;
+    let mut attempts = 0;
+
     if !stdin_is_tty {
         // read the input from stdin if piped
         io::stdin().read_to_string(&mut file_path).expect("Failed to read from stdin");
@@ -25,6 +29,10 @@ pub fn extract_file() -> (String, Vec<u8>) {
 
     loop {
         if stdin_is_tty {
+            if attempts >= max_attempts {
+                println!("Maximum attempts reached. Aborting...");
+                break;
+            }
             // ask for file path if in interactive mode
             println!("\n1. Please type the absolute path to your input file:");
             file_path = text_io::read!("{}");
@@ -38,11 +46,20 @@ pub fn extract_file() -> (String, Vec<u8>) {
 
         // Try again if nothing could be retrieved from the path provided by the user
         if file_content.is_empty() {
+            attempts += 1;
+
             if stdin_is_tty {
                 println!("Error - trying again!");
+                if attempts >= max_attempts {
+                    println!("Maximum attempts reached. Aborting...");
+                    break;
+                }
             } else {
                 println!("Error: Failed to read file or file is empty.");
-                break;
+                if attempts >= max_attempts {
+                    println!("Maximum attempts reached. Aborting...");
+                    break;
+                }
             }
         } else {
             break;
@@ -73,13 +90,16 @@ pub fn extract_file() -> (String, Vec<u8>) {
         } else {
             println!("unknown format, assuming binary");
         }
+
+        // Get the first 256 bytes from the file for performance 
+        file_content.truncate(256);
+
     } else {
         println!("Error: File content is empty. Unable to process the file.");
     }
 
-    // Get the first 128 bytes from the file for performance 
-    file_content.truncate(128);
     return (file_path, file_content)
+    
 }
 
 // Decode a hex file to binary representation
