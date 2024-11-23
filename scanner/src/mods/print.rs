@@ -1,5 +1,8 @@
 use std::fs;
 
+///prints metadata of file
+///parameters: reference to metadata struct containing details of file
+///output is file name, size, entropy
 // //metadata
 // pub fn print_metadata(metadata: &Metadata) {
 //     println!("File Metadata:");
@@ -17,6 +20,9 @@ use std::fs;
 //     }
 // }
 
+///prints a list of input files available in samples directory
+///outputs file paths of all files in samples
+///if directory can't be read, handle error
 pub fn print_list_inputs() {
 
     println!("\nSelect one of these files:");

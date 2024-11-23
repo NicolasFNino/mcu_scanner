@@ -42,7 +42,11 @@ impl Default for Field {
     }
 }
 
-// Entry point of this file. Takes a file and outputs the information extracted from the signature
+///entry point of this file - takes a file and outputs the information extracted from the signature
+///verifies content of file with predefined sigs
+///reads sig def from file and matches content with each sig
+///params: name of file being verified and vinary content of file
+///returns vector of matched sig data if content matches sigs
 pub fn verify_file(file_name: String, contents: Vec<u8>) -> Vec<Vec<(String, String)>>{
     println!("\n3. Verifing the contents of the input file:");
     let mut signature_matches: Vec<Vec<(String, String)>> = Vec::new();
@@ -68,6 +72,10 @@ pub fn verify_file(file_name: String, contents: Vec<u8>) -> Vec<Vec<(String, Str
     signature_matches
 }
 
+///parses description string to extract numerical vals
+///looks for patterns to do this
+///params: stirng with description field
+///returns extracted int valye from descriptiona nd 0 if not found
 fn parse_description_str(description: &str) -> i32 {
     if description.contains("strlen:") {
         let mut result: Option<i32> = None;
@@ -86,7 +94,11 @@ fn parse_description_str(description: &str) -> i32 {
     return 0;
 }
 
-// Takes a signature and file content and extracts the relevant information
+///takes a signature and file content and extracts the relevant information
+///matches file binary content with single signature
+///checks each field in sig for match against contect and extracts relevant data from matching field
+///params: name of file being matches, sig struct for single sig def, mutable reference to binary content fo file, mutable reference to list of matched sig data
+///updates list_mtches with matched sig data if sig is valid
 fn match_signature(file_name: &String, entry: Signature, file_content: &mut Vec<u8>, list_matches: &mut Vec<Vec<(String, String)>>) {
     let mut is_valid = true;
     let mut current_match: Vec<(String, String)> = Vec::new();
@@ -311,7 +323,10 @@ fn match_signature(file_name: &String, entry: Signature, file_content: &mut Vec<
     }
 }
 
-// Read the file containing the signatures information to match them against the target firmware
+
+///read the file containing the signatures information to match them against the target firmware
+///reads sig def form a file - each sig contains multiple fields with position, type, constraints, descriptions
+///returns vector of signature structs representing parsed sig definitions
 fn read_signatures() -> Vec<Signature> {
     let mut results = Vec::new();
 
@@ -407,7 +422,11 @@ fn calculate_crc(contents: &[u8]) -> u16 {
     X25.checksum(contents)
 }
 
-// Method to match the file size reported in the signature and the one calculated from the file
+
+///verify size of file against expected size - compares actual size of file to specified size in signature
+///calculates and prints crc checksum of file
+///parameters: path to file being verified and expected size of file in bytes
+///returns Ok(true) if match, Ok(false) if error or no match
 fn verify_size(file_path: &str, expected_size: usize) -> std::io::Result<bool> {
     let file = std::fs::read(file_path)?;
     if file.len() != expected_size {
@@ -420,19 +439,25 @@ fn verify_size(file_path: &str, expected_size: usize) -> std::io::Result<bool> {
 
 } //verify_size
 
-// Prints the data from the matched signatures
+///prints the data from the matched signatures
+///outputs formatted lsit of matched sig fields and their extracted vals
+///params: vector of matched sig data
 pub fn print_data(sig_matches: Vec<Vec<(String, String)>>) {
     println!("\n4. This is the information that you were looking for: ");
     println!("{:#?}", sig_matches);
 }
 
-// Helper method to read the lines of the signatures file
+///helper method to read the lines of the signatures file
+///resds lines from file - opens file and uses iterator to process each line
+///params: path to file
+///returns an iterator over lines of file and error if file can't be opened
 fn read_lines<P>(filename: P) -> Result<Lines<BufReader<File>>>
 where P: AsRef<Path>, {
     let file = File::open(filename)?;
     Ok(BufReader::new(file).lines())
 }
 
+///unit tests
 #[cfg(test)]
 mod tests{
     use super::*;

@@ -8,7 +8,11 @@ use flate2::read::GzDecoder;
 use zip::ZipArchive;
 use atty;
 
-
+///extracts a firmware file from either user input or stdin
+///if input is piped, reads content directly from stdin
+///else, prompts the user for the file path and reads content
+//allows recompression of .gz and .tar and converts other formats to binaries
+//returns tuple with file path and content of bianry
 pub fn extract_file() -> (String, Vec<u8>) {
     let mut file_path = String::new();
     let mut file_content = Vec::new();
@@ -16,7 +20,7 @@ pub fn extract_file() -> (String, Vec<u8>) {
     // check if input is from interactive input or piped
     let stdin_is_tty = atty::is(atty::Stream::Stdin);
 
-    // Maximum number of attempts to prevent infinite loop
+    // maximum number of attempts to prevent infinite loop
     let max_attempts = 3;
     let mut attempts = 0;
 
@@ -49,10 +53,10 @@ pub fn extract_file() -> (String, Vec<u8>) {
         // pipping will usually add quotes so this is to trim those off
         file_path = file_path.trim_matches('"').trim_matches('\'').to_string();
 
-        // Get the contents of the file and store it in the vector of u8 values
+        // get the contents of the file and store it in the vector of u8 values
         file_content = read_firmware(file_path.as_str());
 
-        // Try again if nothing could be retrieved from the path provided by the user
+        // try again if nothing could be retrieved from the path provided by the user
         if file_content.is_empty() {
             attempts += 1;
 
@@ -103,7 +107,7 @@ pub fn extract_file() -> (String, Vec<u8>) {
             println!("unknown format, assuming binary");
         }
 
-        // Get the first 256 bytes from the file for performance 
+        // get the first 256 bytes from the file for performance 
         file_content.truncate(256);
 
     } else {
@@ -114,7 +118,9 @@ pub fn extract_file() -> (String, Vec<u8>) {
     
 }
 
-// Decode a hex file to binary representation
+///decode a hex file to binary representation
+///prameters: string slice of one line of intel hex data
+//returns vector of binary data or error if there is something wrong/failure during parsing
 fn intel_hex_to_binary(data: &[u8]) -> Result<Vec<u8>, ParseIntError> {
     let data_str = String::from_utf8_lossy(data);
     let mut binary_data = Vec::new();
@@ -127,7 +133,9 @@ fn intel_hex_to_binary(data: &[u8]) -> Result<Vec<u8>, ParseIntError> {
     Ok(binary_data)
 }
 
-// Helper method for the intel_hex_to_binary method
+///helper method for the intel_hex_to_binary method
+///prameters: string slice of one line of intel hex data
+//returns vector of binary data or error if there is something wrong/failure during parsing
 fn parse_hex_data(datahex: &str) -> Result<Vec<u8>, ParseIntError> {
     let mut binary_data = Vec::new();
     let datahex_len = u8::from_str_radix(&datahex[1..3], 16)?;
@@ -144,7 +152,9 @@ fn parse_hex_data(datahex: &str) -> Result<Vec<u8>, ParseIntError> {
     Ok(binary_data)
 }
 
-// Decode Motorola SRecord fole to binary representation
+/// decode Motorola SRecord fole to binary representation
+///paramters: slice of bytes representing the S-Record data
+///returns vector of binary data or error if there is something wrong/failure during parsing
 fn srec_to_binary(data: &[u8]) -> Result<Vec<u8>, ParseIntError> {
     let data_str = String::from_utf8_lossy(data);
     let mut binary_data = Vec::new();
@@ -157,7 +167,9 @@ fn srec_to_binary(data: &[u8]) -> Result<Vec<u8>, ParseIntError> {
     Ok(binary_data)
 }
 
-// Helper method for the srec_to_binary method
+///helper method for the srec_to_binary method
+///parameters: string slice of a single line of S-Record data
+///returns vector of binary data or error if there is something wrong/failure during parsing
 fn parse_srec_data(datasrec: &str) -> Result<Vec<u8>, ParseIntError> {
     let mut binary_data = Vec::new();
     let datasrec_type = &datasrec[1..2];
@@ -180,7 +192,9 @@ fn parse_srec_data(datasrec: &str) -> Result<Vec<u8>, ParseIntError> {
     Ok(binary_data)
 }
 
-// Decompress gz file
+///decompresses gz file
+///parameters: path to gx file
+///returns vecror of binary fata or error if decompression fails
 fn decompress_gz(file_path: &str) -> Result<Vec<u8>, std::io::Error> {
     let file = File::open(file_path)?;
     let mut gz = GzDecoder::new(file);
@@ -189,7 +203,9 @@ fn decompress_gz(file_path: &str) -> Result<Vec<u8>, std::io::Error> {
     Ok(binary_data)
 }
 
-// Decompress zip file
+// decompresses zip file
+///parameter: path to the zip file
+///returns vector of binary data or error if failure
 fn extract_zip(file_path: &str) -> Result<Vec<u8>, std::io::Error> {
     let file = File::open(file_path)?;
     let mut archive = ZipArchive::new(file)?;
@@ -201,6 +217,10 @@ fn extract_zip(file_path: &str) -> Result<Vec<u8>, std::io::Error> {
     Ok(binary_data)
 }
 
+
+///converts hexadecimal string into binary
+///parameter: hex string
+///returns vector of binary data or error if failure
 fn hex_str_to_binary(hex: &str) -> Result<Vec<u8>, std::num::ParseIntError> {
     let hex = hex.trim_start_matches("0x");
 
@@ -219,6 +239,10 @@ fn hex_str_to_binary(hex: &str) -> Result<Vec<u8>, std::num::ParseIntError> {
     Ok(binary_vec)
 }//end hex_str_to_binary
 
+
+///reads hex file and converts to binary
+///parameter: path to file with hex data
+///returns vector of vinary data or error if failure during parsing
 fn hex_file_to_binary(file_path: &str) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
     let mut file = File::open(file_path)?; 
     let mut hex_data = String::new();
@@ -241,6 +265,9 @@ fn hex_file_to_binary(file_path: &str) -> Result<Vec<u8>, Box<dyn std::error::Er
 }//end hex_file_to_binary
 
 
+///calculates entropy of file contents
+///parameter: path to the file
+///returns entropy as float or error if failure while reading file
 fn calculate_file_entropy(file_path: &str) -> Result<f32, std::io::Error> {
     let file = File::open(file_path)?; 
     let mut buf_reader = BufReader::new(file); 
@@ -251,6 +278,10 @@ fn calculate_file_entropy(file_path: &str) -> Result<f32, std::io::Error> {
     Ok(entropy)
 }
 
+
+///check to see if file encrypted based on entropy
+///parameters: path to file
+///rreturns true if file entropy = encryptions and false if not
 fn is_encrypted(file_path: &str) -> bool {
     let entropy = calculate_file_entropy(&file_path);
 
@@ -269,7 +300,10 @@ fn is_encrypted(file_path: &str) -> bool {
     return false;
 }
 
-// Helper method to get the file contents and return it as a Vector of u8 values
+///helper method to get the file contents and return it as a Vector of u8 values
+///reads content into vector of bytes
+///param: path to firmware
+///returns vector of bytes with file content or empty vector if failure
 pub fn read_firmware<'a>(file_path: &'a str) -> Vec<u8> {
     //try to open with file path
     match std::fs::read(file_path) {
@@ -283,7 +317,7 @@ pub fn read_firmware<'a>(file_path: &'a str) -> Vec<u8> {
     }
 }
 
-
+//////unit tests
 #[cfg(test)]
 mod tests{
     use super::*;

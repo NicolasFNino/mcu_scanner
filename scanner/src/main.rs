@@ -1,5 +1,8 @@
 mod mods;
 
+///entry point for application
+///just welcomes user, lists available input files, extracts binary content from selected file (handling other formats), 
+///matches content to signatures, prints extracted info
 fn main() {
     println!("\nWelcome to MCU Scanner 🦀🦀🦀");
 
